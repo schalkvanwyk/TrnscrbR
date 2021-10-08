@@ -109,9 +109,6 @@
     var transcriptData;
     var startTimes;
     var lastStartTime;
-    // var dialogueTimings;
-    // var dialogues;
-    // var previousDialogueTime = -1;
     var currentDialogue;
     var previousDialogue;
 
@@ -170,10 +167,6 @@
                     transcriptData = JSON.parse(e.target.result);
                     
                     displayTranscriptResults(transcriptData.results);
-
-                    // dialogues = Array.from(transcriptWrapper.querySelectorAll('p>span[id]'));
-
-                    // dialogueTimings = dialogues.map(dialogue => Number(dialogue.id.replace('segment_item_', '')));
 
                     startTimes = transcriptData.results.items.filter(o => o.type !== 'punctuation').map(o => Number(o.start_time));
                 };
@@ -239,21 +232,11 @@
                 segmentContainer.appendChild(segmentItem);
             });
 
-            // segment.items.forEach(segmentItem => {
-            //     let item = items.find(item => item.start_time == segmentItem.start_time);
-            //     if (item) {
-            //         segmentContainer.appendChild(itemContainer);
-            //         segmentContainer.appendChild(nbsp.cloneNode());
-            //     }
-            // });
-            // // segmentContainer.appendChild(document.createElement('span'))
-
             segmentsContainer.appendChild(segmentContainer);
         });
     }
 
     function handlePlay(e) {
-        // currentDialogue = 
         if(!dialogueTimings) {
             e.preventDefault();
 
@@ -274,9 +257,6 @@
 
     function handleSeeked(e) {
         if(!transcriptData) return;
-
-        // if(!dialogueTimings) return;
-        // transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
 
         transcriptWrapper.querySelectorAll('p>span').forEach(o => {
             o.classList.remove('speaking');
@@ -309,48 +289,6 @@
 
         transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
     }
-    function handleTimeUpdated2(e) {
-        if(!dialogueTimings) return;
-
-        transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
-    }
-    function handleTimeUpdated1(e) {
-        if(!dialogueTimings) return;
-
-        let currentDialogueTime = Math.round(e.target.currentTime * 1000);
-        currentDialogueTime = Math.max.apply(Math, dialogueTimings.filter(function (v) { return v <= currentDialogueTime }));
-        //console.log(currentDialogueTime);
-
-        if (currentDialogueTime <= 0) {
-            if (previousDialogue) previousDialogue.classList.remove('speaking');
-            currentDialogue = null;
-            transcriptWrapper.scrollTop = 0;
-
-            return;
-        }
-        // else if(previousDialogueTime < currentDialogueTime) return;
-
-        // currentDialogue = dialogues.find(d => Number(d.dataset.start_time) <= currentDialogueTime && Number(d.dataset.end_time) >= currentDialogueTime);
-
-        // if (currentDialogue && previousDialogueTime !== currentDialogueTime) {
-        if (previousDialogueTime !== currentDialogueTime) {
-            let index = dialogueTimings.indexOf(currentDialogueTime);
-            currentDialogue = dialogues[index];
-            // console.log(index + ' | ' + currentDialogueTime + ' | ' + currentDialogue.id + ' | ' + previousDialogueTime + ' | ' + transcriptData.results.items.find(o => (o.start_time * 1000) === currentDialogueTime)?.alternatives[0]?.content);
-
-            if (!previousDialogue) previousDialogue = document.getElementsByClassName('speaking')[0];
-
-            if (previousDialogue) previousDialogue.classList.remove('speaking');
-
-            currentDialogue.classList.add('speaking');
-
-            transcriptWrapper.scrollTop = currentDialogue.offsetTop - transcriptWrapperOffSetTop-25;
-
-            previousDialogue = currentDialogue;
-        }
-
-        previousDialogueTime = currentDialogueTime;
-    }
 
     function handleSpeaking(e) {
         let currentTime = e.detail;
@@ -376,40 +314,6 @@
         }
 
         // console.log(`${lastStartTime} | ${startTime} (${Math.round(startTime * 1000)}) | ${currentDialogue?.textContent}`);
-    }
-    function handleSpeaking1(e) {
-        let currentTime = e.detail;
-        let currentDialogueTime = Math.round(currentTime * 1000);
-        let currentDialogueTimingIndex = dialogueTimings.findIndex(o => o > currentDialogueTime)-1;
-        //TODO: Try binary search
-        // let middle = dialogueTimings.length / 2;
-        // let middleTiming = dialogueTimings[middle];
-        // let tempTimings = dialogueTimings;
-        // let sliced = false;
-        // if(sliced = currentDialogueTime >= middleTiming) tempTimings = tempTimings.slice(middle);
-        // let currentDialogueTimingIndex = tempTimings.findIndex(o => o > currentDialogueTime)-1;
-        // if(sliced) currentDialogueTimingIndex += middle;
-        let currentDialogueTiming = dialogues[currentDialogueTimingIndex];
-
-        console.log(currentDialogueTimingIndex + ' | ' + previousDialogueTime + ' | ' + currentDialogueTime + ' | ' + currentDialogueTiming);
-        
-        if(currentDialogueTimingIndex === -1) return;
-        
-        if (previousDialogueTime !== currentDialogueTiming) {
-            currentDialogue = dialogues[currentDialogueTimingIndex];
-
-            // console.log("Seeked: " + currentTime + " | " + currentDialogueTime + " | " + currentDialogueTiming + ' | ' + transcriptData.results.items.find(o => (o.start_time * 1000) === Number(currentDialogue.dataset.start_time))?.alternatives[0]?.content);
-
-            previousDialogue?.classList.remove('speaking');
-
-            currentDialogue.classList.add('speaking');
-
-            transcriptWrapper.scrollTop = currentDialogue.offsetTop - transcriptWrapperOffSetTop-25;
-
-            previousDialogue = currentDialogue;
-        }
-
-        previousDialogueTime = currentDialogueTiming;
     }
 </script>
 
