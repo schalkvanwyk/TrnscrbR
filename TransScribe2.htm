@@ -186,6 +186,7 @@
         transcriptInfo.appendChild(document.createElement('li')).textContent = `Languages detected: ${transcriptResults.language_identification.map(languageReducer).join(' ')}`;
         transcriptInfo.appendChild(document.createElement('li')).textContent = `Number of speakers: ${speakerLabels.speakers}`;
         transcriptInfo.appendChild(document.createElement('li')).textContent = `Number of segments: ${speakerLabels.segments.length}`;
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Estimated number of words: ${transcriptResults.items.filter(o => o.type !== 'punctuation').length}`;
 
         transcriptResults.transcripts.forEach(transcriptItem => {
             document.getElementById('rawTransscriptContainer').appendChild(document.createElement('p')).textContent = transcriptItem.transcript;
