@@ -1,0 +1,416 @@
+<html>
+<head>
+    <title>Trans Scriber</title>
+    <style>
+        div.raw {
+            display: block;
+            height: 20%;
+            overflow: auto;
+        }
+
+        div.segmented {
+            display: block;
+            height: 40%;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #segmentedTransscriptContainer>p {
+            background-color: coral;
+        }
+
+        #segmentedTransscriptContainer>p>span.segmentLabel {
+            background-color: lightgray;
+        }
+
+        #segmentedTransscriptContainer>p>span.dialogue {
+            -webkit-filter: blur(1.2px);
+            filter: blur(1.2px);
+            transition: all 0.2s ease;
+        }
+
+        #segmentedTransscriptContainer>p>span.punctuation {
+            -webkit-filter: blur(0.8px);
+            filter: blur(0.8px);
+        }
+
+        #segmentedTransscriptContainer>p>span.speaking {
+            background-color: yellow;
+            -webkit-filter: blur(0px);
+            filter:blur(0px);
+        }
+        #segmentedTransscriptContainer>p>span.spoke {
+            background-color: lightyellow;
+            -webkit-filter: blur(0.5px);
+            filter: blur(0.5px);
+        }
+    </style>
+</head>
+<header>
+    <h1>Transcription</h1>
+</header>
+<hr />
+<body>
+    <main>
+        <section id="audioSection">
+            <h1>Audio</h1>
+            <hr />
+            <label for="audioFileSource">Load the audio file</label>
+            <input id="audioFileSource" class="file-input" type="file" name="audioFileSource" />
+            <span id="audioFileName" class="file-name">
+                No File
+            </span>
+            <div id="audioContainer">
+                <audio id="audioPlayer" controls 
+                        ontimeupdate="handleTimeUpdated(event)" 
+                        onplay="handlePlay(event)" 
+                        onended="handleEnded(event)" 
+                        onseeked="handleSeeked(event)">
+                    <source src="Samples/[Handri van der Merwe]_104-+448002465069_20210827100553(8).wav"> <!-- type="audio/mpeg" -->
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </section>
+        <hr />
+        <section id="transscriptSection" class="transscript">
+            <h1>Transcript</h1>
+            <hr />
+            <label for="transcriptFileSource">Load the transcript file</label>
+            <input id="transcriptFileSource" class="file-input" type="file" name="transcriptFileSource" />
+            <span id="transcriptFileName" class="file-name">
+                No File
+            </span>
+            <hr />
+            <details>
+                <summary>Transcript Information</summary>
+                <div id="infoTransscriptContainer" class="info"></div>
+            </details>
+            <hr />
+            <div id="segmentedTransscriptContainer" class="segmented"></div>
+            <!-- <div id="scrollOutput"></div> -->
+            <hr />
+            <details>
+                <summary>Full transcript</summary>
+                <div id="rawTransscriptContainer" class="raw"></div>
+            </details>
+        </section>
+    </main>
+</body>
+<script type="text/javascript" defer>
+    document.getElementById('audioFileSource').addEventListener('change', handleAudioFileSelect, false);
+    document.getElementById('transcriptFileSource').addEventListener('change', handleJsonFileSelect, false);
+    // document.getElementById('audioPlayer').addEventListener('play', handlePlay, false);
+
+    const nbsp = document.createTextNode("\u00A0");
+
+    const audio = document.getElementById('audioPlayer');
+    // audio.muted = true;
+
+    var transcriptData;
+    var startTimes;
+    var lastStartTime;
+    // var dialogueTimings;
+    // var dialogues;
+    // var previousDialogueTime = -1;
+    var currentDialogue;
+    var previousDialogue;
+
+    const transcriptInfo = document.getElementById('infoTransscriptContainer');
+    const transcriptWrapper = document.getElementById('segmentedTransscriptContainer');
+    transcriptWrapper.addEventListener('speaking', handleSpeaking, false);
+    const transcriptWrapperOffSetTop = transcriptWrapper.offsetTop;
+    // transcriptWrapper.addEventListener("scroll", event => scrollOutput.textContent = `scrollTop: ${transcriptWrapper.scrollTop}`);
+
+    function handleAudioFileSelect(evt) {
+        var files = evt.target.files;
+
+        for (var i = 0, f; f = files[i]; i++) {
+
+            // Only process audio files.
+            if (!f.type.match('audio.*')) {
+                alert('Must be an audio file');
+                return;
+            };
+
+            // Warn user if file size is larger than 50mb
+            fileSize = Math.round(files[0].size / 1000000)
+            if (fileSize > 50.457280) {
+                alert('This audio file is ' + fileSize + 'mb. There may be playback issues above 50mb. For ways to reduce file size see the docs: https://github.com/smlum/scription#uploading-large-audio-files-to-scription');
+                // TODO use Bulma modal instead of alert
+                // $('.modal-audio-size'){}
+                // return;
+            }
+
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    document.getElementById('audioPlayer').src = e.target.result;
+                    console.log("loading audio: " + theFile.name);
+                    document.getElementById('audioFileName').innerHTML = theFile.name;
+                };
+            })(f);
+
+            reader.readAsDataURL(f);
+        }
+    }
+
+    function handleJsonFileSelect(evt) {
+        const files = evt.target.files;
+        for (let i = 0, f; f = files[i]; i++) {
+            let reader = new FileReader();
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    console.log(`loading json: ${theFile.name}`);
+
+                    document.getElementById('transcriptFileName').appendChild(document.createElement('li')).textContent = theFile.name;
+                    
+                    transcriptData = JSON.parse(e.target.result);
+                    
+                    displayTranscriptResults(transcriptData.results);
+
+                    // dialogues = Array.from(transcriptWrapper.querySelectorAll('p>span[id]'));
+
+                    // dialogueTimings = dialogues.map(dialogue => Number(dialogue.id.replace('segment_item_', '')));
+
+                    startTimes = transcriptData.results.items.filter(o => o.type !== 'punctuation').map(o => Number(o.start_time));
+                };
+            })(f);
+
+            reader.readAsText(f);
+        }
+    }
+
+    function displayTranscriptResults(transcriptResults) {
+        let speakerLabels = transcriptResults.speaker_labels;
+
+        const languageReducer = o => `${o.code} (${o.score})`;
+
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Job Name: ${transcriptData.jobName}`;
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Language: ${transcriptResults.language_code}`;
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Languages detected: ${transcriptResults.language_identification.map(languageReducer).join(' ')}`;
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Number of speakers: ${speakerLabels.speakers}`;
+        transcriptInfo.appendChild(document.createElement('li')).textContent = `Number of segments: ${speakerLabels.segments.length}`;
+
+        transcriptResults.transcripts.forEach(transcriptItem => {
+            document.getElementById('rawTransscriptContainer').appendChild(document.createElement('p')).textContent = transcriptItem.transcript;
+        });
+
+        const segmentsContainer = document.getElementById('segmentedTransscriptContainer');
+
+        var lastEndTime;
+        var lastStartTime;
+
+        const items = transcriptResults.items.map(item => {
+            let startTime = item.start_time ? Math.round(lastStartTime = item.start_time * 1000) : lastStartTime;
+            let endTime = item.end_time ? Math.round(lastEndTime = item.end_time * 1000) : lastEndTime;
+
+            let itemContainer = document.createElement('span');
+            if(item.type !== 'punctuation') {
+                itemContainer.id = 'segment_item_' + startTime;
+                itemContainer.dataset.duration_ms = Math.round(endTime - startTime);
+                itemContainer.classList.add('dialogue');
+            }
+            itemContainer.dataset.type = item.type;
+            itemContainer.dataset.start_time = startTime;
+            itemContainer.dataset.end_time = endTime;
+            itemContainer.dataset.confidence = item.alternatives[0].confidence;
+            itemContainer.innerText = item.alternatives[0].content;
+
+            return itemContainer;
+        });
+
+        speakerLabels.segments.forEach(segment => {
+            let segmentContainer = document.createElement('p');
+
+            let segmentStartTime = Math.round(segment.start_time * 1000);
+            let segmentEndTime = Math.round(segment.end_time * 1000);
+
+            let segmentLabel = segmentContainer.appendChild(document.createElement('span'));
+            segmentLabel.classList.add('segmentLabel');
+            segmentLabel.textContent = `${segment.speaker_label} (${segment.start_time} - ${segment.end_time}): `;
+            
+            let segmentItems = items.filter(item => item.dataset.start_time >= segmentStartTime && item.dataset.end_time <= segmentEndTime);
+            segmentItems.forEach(segmentItem => {
+                if(segmentItem.dataset.type !== 'punctuation') segmentContainer.appendChild(nbsp.cloneNode());
+                else segmentItem.classList.add('punctuation');
+                segmentContainer.appendChild(segmentItem);
+            });
+
+            // segment.items.forEach(segmentItem => {
+            //     let item = items.find(item => item.start_time == segmentItem.start_time);
+            //     if (item) {
+            //         segmentContainer.appendChild(itemContainer);
+            //         segmentContainer.appendChild(nbsp.cloneNode());
+            //     }
+            // });
+            // // segmentContainer.appendChild(document.createElement('span'))
+
+            segmentsContainer.appendChild(segmentContainer);
+        });
+    }
+
+    function handlePlay(e) {
+        // currentDialogue = 
+        if(!dialogueTimings) {
+            e.preventDefault();
+
+            console.error("No transscript loaded! There are no 'dialogueTimings' loaded.");
+            
+            alert("No transscript loaded! Load a AWS transcript json file ");
+
+            return e.returnValue = false;
+        }
+    }
+
+    function handleEnded(e) {
+        previousDialogue?.classList.remove('speaking');
+        previousDialogue?.classList.add('spoke');
+        currentDialogue?.classList.remove('speaking');
+        currentDialogue?.classList.add('spoke');
+    }
+
+    function handleSeeked(e) {
+        if(!transcriptData) return;
+
+        // if(!dialogueTimings) return;
+        // transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
+
+        transcriptWrapper.querySelectorAll('p>span').forEach(o => {
+            o.classList.remove('speaking');
+            o.classList.remove('spoke');
+        });
+
+        let currentTime = e.target.currentTime;
+        let previousStartTime = currentTime;
+        startTimes = transcriptData.results.items
+            .filter(o => {
+                let isNotPuctuation = o.type !== 'punctuation';
+                let mustInclude = o.start_time >= currentTime;
+                if(!mustInclude && isNotPuctuation) previousStartTime = Number(o.start_time);
+                return mustInclude && isNotPuctuation;
+            })
+            .map(o => Number(o.start_time));
+        if(previousStartTime === 0) {
+            transcriptWrapper.scrollTop = 0;
+            return;
+        }
+        else if(e.target.ended) return;
+
+        if(previousStartTime < startTimes[0]) startTimes.unshift(previousStartTime);
+
+        transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: currentTime }));
+    }
+
+    function handleTimeUpdated(e) {
+        if(!transcriptData) return;
+
+        transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
+    }
+    function handleTimeUpdated2(e) {
+        if(!dialogueTimings) return;
+
+        transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
+    }
+    function handleTimeUpdated1(e) {
+        if(!dialogueTimings) return;
+
+        let currentDialogueTime = Math.round(e.target.currentTime * 1000);
+        currentDialogueTime = Math.max.apply(Math, dialogueTimings.filter(function (v) { return v <= currentDialogueTime }));
+        //console.log(currentDialogueTime);
+
+        if (currentDialogueTime <= 0) {
+            if (previousDialogue) previousDialogue.classList.remove('speaking');
+            currentDialogue = null;
+            transcriptWrapper.scrollTop = 0;
+
+            return;
+        }
+        // else if(previousDialogueTime < currentDialogueTime) return;
+
+        // currentDialogue = dialogues.find(d => Number(d.dataset.start_time) <= currentDialogueTime && Number(d.dataset.end_time) >= currentDialogueTime);
+
+        // if (currentDialogue && previousDialogueTime !== currentDialogueTime) {
+        if (previousDialogueTime !== currentDialogueTime) {
+            let index = dialogueTimings.indexOf(currentDialogueTime);
+            currentDialogue = dialogues[index];
+            // console.log(index + ' | ' + currentDialogueTime + ' | ' + currentDialogue.id + ' | ' + previousDialogueTime + ' | ' + transcriptData.results.items.find(o => (o.start_time * 1000) === currentDialogueTime)?.alternatives[0]?.content);
+
+            if (!previousDialogue) previousDialogue = document.getElementsByClassName('speaking')[0];
+
+            if (previousDialogue) previousDialogue.classList.remove('speaking');
+
+            currentDialogue.classList.add('speaking');
+
+            transcriptWrapper.scrollTop = currentDialogue.offsetTop - transcriptWrapperOffSetTop-25;
+
+            previousDialogue = currentDialogue;
+        }
+
+        previousDialogueTime = currentDialogueTime;
+    }
+
+    function handleSpeaking(e) {
+        let currentTime = e.detail;
+        let startTime = Number(startTimes[0]);
+
+        // console.log(`${currentTime} | ${startTime}`);
+
+        if(currentTime > startTime){
+            lastStartTime = startTimes.shift();
+            previousDialogue = currentDialogue;
+        } 
+        else return;
+
+        if(lastStartTime > currentTime) return;
+
+        currentDialogue = transcriptWrapper.querySelector(`p>span[id="segment_item_${Math.round(startTime * 1000)}"]`);
+        if(currentDialogue) {
+            currentDialogue.classList.add('speaking');
+            previousDialogue?.classList.remove('speaking');
+            previousDialogue?.classList.add('spoke');
+            
+            transcriptWrapper.scrollTop = currentDialogue.offsetTop - transcriptWrapperOffSetTop-25;
+        }
+
+        // console.log(`${lastStartTime} | ${startTime} (${Math.round(startTime * 1000)}) | ${currentDialogue?.textContent}`);
+    }
+    function handleSpeaking1(e) {
+        let currentTime = e.detail;
+        let currentDialogueTime = Math.round(currentTime * 1000);
+        let currentDialogueTimingIndex = dialogueTimings.findIndex(o => o > currentDialogueTime)-1;
+        //TODO: Try binary search
+        // let middle = dialogueTimings.length / 2;
+        // let middleTiming = dialogueTimings[middle];
+        // let tempTimings = dialogueTimings;
+        // let sliced = false;
+        // if(sliced = currentDialogueTime >= middleTiming) tempTimings = tempTimings.slice(middle);
+        // let currentDialogueTimingIndex = tempTimings.findIndex(o => o > currentDialogueTime)-1;
+        // if(sliced) currentDialogueTimingIndex += middle;
+        let currentDialogueTiming = dialogues[currentDialogueTimingIndex];
+
+        console.log(currentDialogueTimingIndex + ' | ' + previousDialogueTime + ' | ' + currentDialogueTime + ' | ' + currentDialogueTiming);
+        
+        if(currentDialogueTimingIndex === -1) return;
+        
+        if (previousDialogueTime !== currentDialogueTiming) {
+            currentDialogue = dialogues[currentDialogueTimingIndex];
+
+            // console.log("Seeked: " + currentTime + " | " + currentDialogueTime + " | " + currentDialogueTiming + ' | ' + transcriptData.results.items.find(o => (o.start_time * 1000) === Number(currentDialogue.dataset.start_time))?.alternatives[0]?.content);
+
+            previousDialogue?.classList.remove('speaking');
+
+            currentDialogue.classList.add('speaking');
+
+            transcriptWrapper.scrollTop = currentDialogue.offsetTop - transcriptWrapperOffSetTop-25;
+
+            previousDialogue = currentDialogue;
+        }
+
+        previousDialogueTime = currentDialogueTiming;
+    }
+</script>
+
+</html>
