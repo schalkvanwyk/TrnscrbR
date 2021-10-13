@@ -272,6 +272,18 @@
             return clear;
         }
     }
+
+    function secondsToTime(seconds){
+        // let hr  = Math.floor(seconds / 3600);
+        let sec = Math.floor(seconds);
+        sec = Math.floor( sec % 60 );
+        sec = sec >= 10 ? sec : '0' + sec;
+
+        let min = Math.floor(seconds / 60);
+        min = min >= 10 ? min : '0' + min;
+
+        return min + ":" + sec;
+    }
 </script>
 
 <script type="text/javascript" defer>
@@ -449,7 +461,7 @@
 
             let segmentLabel = segmentContainer.appendChild(document.createElement('span'));
             segmentLabel.classList.add('segmentLabel');
-            segmentLabel.textContent = `${segment.speaker_label} (${segment.start_time} - ${segment.end_time}): `;
+            segmentLabel.textContent = `${segment.speaker_label} (${secondsToTime(segment.start_time)} - ${secondsToTime(segment.end_time)}): `;
             segmentLabel.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
             segmentLabel.onclick = handleSegmentLabelClick;
             
