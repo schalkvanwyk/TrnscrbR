@@ -12,16 +12,24 @@
             grid-column: 1 / 3;
             grid-row: 1 / 12;
             column-width: 70%;
+            min-width: 385px;
+        }
+
+        section.aside {
+            grid-column: 3 / 3;
+            max-width: 335px;
         }
 
         section.aside.audio {
-            grid-column: 3 / 3;
             grid-row: 1;
         }
 
         section.aside.info {
-            grid-column: 3 / 3;
             grid-row: 5;
+        }
+
+        section.aside.info li {
+            color: azure;
         }
 
         div.raw {
@@ -41,7 +49,7 @@
         }
 
         div.segmented p span.segmentLabel {
-            background-color: lightgray;
+            color: azure;
         }
 
         div.segmented p span.dialogue {
@@ -64,6 +72,39 @@
             background-color: lightyellow;
             -webkit-filter: blur(0.5px);
             filter: blur(0.5px);
+        }
+
+        div.file-name {
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        .speaker-1 {
+            background-color: darkgoldenrod;
+        }
+        .speaker-2 {
+            background-color: darkgreen;
+        }
+        .speaker-3 {
+            background-color: darkblue;
+        }
+        .speaker-4 {
+            background-color: darkcyan;
+        }
+        .speaker-5 {
+            background-color: darksalmon;
+        }
+        .speaker-6 {
+            background-color: darkslateblue;
+        }
+        .speaker-7 {
+            background-color: darkolivegreen;
+        }
+        .speaker-8 {
+            background-color: darkkhaki;
+        }
+        .speaker-9 {
+            background-color: darkseagreen;
         }
     </style>
 </head>
@@ -107,7 +148,7 @@
                         onseeked="handleAudioSeeked(event)">
                     Your browser does not support the <code>audio</code> element.
                 </audio>
-                <div style="overflow-wrap: break-word;">
+                <div>
                     <label for="audioFileSource">Load the audio file</label>
                     <input id="audioFileSource" class="file-input" type="file" name="audioFileSource" />
                 </div>
@@ -303,11 +344,45 @@
     speakersObserver.Observe(function(result, method){
         switch (method) {
             case 'set':
+                let speaker = speakers.get(result);
                 let speakersListItem = speakersList.querySelector(`#${result}`);
+
                 if(!speakersListItem) {
-                    let speakerElement = speakersList.appendChild(document.createElement('li'));
+                    speakersListItem = speakersList.appendChild(document.createElement('li'));
+                    speakersListItem.classList.add(`speaker-${Array.from(speakers.keys()).indexOf(speaker.speakerName)+1}`);
+                    let speakerElement = speakersListItem.appendChild(document.createElement('input'));
                     speakerElement.id = result;
-                    speakerElement.innerText = result;
+                    speakerElement.type = "text"
+                    speakerElement.value = speaker.speakerName;
+                    // speakerElement.onclick = handleSpeakerSelected;
+                    speakerElement.onchange = e => speaker.speakerName = e.target.value;
+                    speaker.speakerObserver.Observe(newValue => {
+                        let speakerSectionLabels = document.querySelectorAll(`span[data-speaker=${result}]`);
+                        speakerSectionLabels.forEach(element => {
+                            element.innerText = newValue;
+                        });
+                    });
+
+                    let speakerSegmentsList = speakersListItem.appendChild(document.createElement('details')).appendChild(document.createElement('ol'));
+                    // let speakerItems = speaker.segments.reduce((p, c) => {
+                    //     if(p) {
+                    //         p.end_time = c.end_time;
+                    //         p.items.join(c.items);
+                    //     }
+                    // });
+                    speaker.segments.forEach(segment => {
+                        speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${secondsToTime(segment.start_time)}-${secondsToTime(segment.end_time)}`;
+                    });
+                } else {
+                    let speakerSegmentsList = speakersListItem.parentNode.querySelector('ol');
+                    // let speakerItems = speaker.segments.reduce((p, c) => {
+                    //     if(p) {
+                    //         p.end_time = c.end_time;
+                    //         p.items.join(c.items);
+                    //     }
+                    // });
+                    let segment = speaker.segments[speaker.segments.length-1];
+                    speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${secondsToTime(segment.start_time)}-${secondsToTime(segment.end_time)}`;
                 }
                 break;
             case 'clear':
@@ -403,7 +478,10 @@
     function populateTranscriptInfo(infoContainer, jobName, transcriptResults, speakerLabels) {
         infoContainer.appendChild(document.createElement('li')).textContent = `Job Name: ${jobName}`;
         infoContainer.appendChild(document.createElement('li')).textContent = `Language: ${transcriptResults.language_code}`;
-        infoContainer.appendChild(document.createElement('li')).textContent = `Languages detected: ${transcriptResults.language_identification.map(o => `${o.code} (${o.score})`).join(' ')}`;
+        let languagesInfo = infoContainer.appendChild(document.createElement('li'));
+        languagesInfo.textContent = `Languages detected:`;
+        let languagesInfoList = languagesInfo.appendChild(document.createElement('ol'));
+        transcriptResults.language_identification.forEach(o => languagesInfoList.appendChild(document.createElement('li')).textContent = `${o.code} (${o.score})`);
         infoContainer.appendChild(document.createElement('li')).textContent = `Number of speakers: ${speakerLabels.speakers}`;
         infoContainer.appendChild(document.createElement('li')).textContent = `Number of segments: ${speakerLabels.segments.length}`;
         infoContainer.appendChild(document.createElement('li')).textContent = `Estimated number of words: ${transcriptResults.items.filter(o => o.type !== 'punctuation').length}`;
@@ -446,24 +524,37 @@
 
         transcriptSegments.forEach((segment, index) => {
             if(!transcriptSpeakers.has(segment.speaker_label)){
-                transcriptSpeakers.set(segment.speaker_label, [segment]);
+                let speaker = { speakerName: segment.speaker_label, segments: [segment] };
+                speaker.speakerObserver = new Observer(speaker, "speakerName");
+                speaker.speakerName = segment.speaker_label;
+
+                transcriptSpeakers.set(segment.speaker_label, speaker);
             } else {
-                let speakerSegments = transcriptSpeakers.get(segment.speaker_label);
-                speakerSegments.push(segment);
-                transcriptSpeakers.set(segment.speaker_label, speakerSegments);
+                let speaker = transcriptSpeakers.get(segment.speaker_label);
+                speaker.segments.push(segment);
+                transcriptSpeakers.set(segment.speaker_label, speaker);
             }
 
+            let speakerIndex = Array.from(transcriptSpeakers.keys()).indexOf(segment.speaker_label)+1;
             let segmentStartTime = Math.round(segment.start_time * 1000);
             let segmentEndTime = Math.round(segment.end_time * 1000);
 
             let segmentContainer = document.createElement('p');
 
-            let segmentLabel = segmentContainer.appendChild(document.createElement('span'));
-            segmentLabel.classList.add('segmentLabel');
-            segmentLabel.textContent = `${segment.speaker_label} (${secondsToTime(segment.start_time)} - ${secondsToTime(segment.end_time)}): `;
-            segmentLabel.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
+            let segmentLabelTemplate = document.createElement('span');
+            segmentLabelTemplate.classList.add(`segmentLabel`);
+            segmentLabelTemplate.classList.add(`speaker-${speakerIndex}`);
+            segmentLabelTemplate.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
+
+            let segmentLabel = segmentContainer.appendChild(segmentLabelTemplate.cloneNode(true));
+            segmentLabel.dataset.speaker = segment.speaker_label;
+            segmentLabel.textContent = `${segment.speaker_label}`;
             segmentLabel.onclick = handleSegmentLabelClick;
-            
+
+            let segmentLabel2 = segmentContainer.appendChild(segmentLabelTemplate.cloneNode(true));
+            segmentLabel2.textContent = ` (${secondsToTime(segment.start_time)} - ${secondsToTime(segment.end_time)}):`;
+            segmentLabel2.onclick = handleSegmentLabelClick;
+
             let segmentItems = transcriptItems.filter(item => item.dataset.start_time >= segmentStartTime && item.dataset.end_time <= segmentEndTime);
             segmentItems.forEach(segmentItem => {
                 if(segmentItem.dataset.type !== 'punctuation') segmentContainer.appendChild(document.createTextNode(' '));
@@ -578,6 +669,10 @@
         previousDialogue = null;
         lastStartTime = null;
         audio.currentTime = e.target.dataset.start_time/1000;
+    }
+
+    function handleSpeakerSelected(e) {
+        alert(`Show Model: ${e.target.id}`);
     }
     
 </script>
