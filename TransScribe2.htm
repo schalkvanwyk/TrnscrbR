@@ -28,8 +28,20 @@
             grid-row: 5;
         }
 
-        section.aside.info li {
+        section.aside ul {
+            margin: 0 0 0 5px;
+            padding: 0;
+        }
+
+        section.aside .speakers ul {
             color: azure;
+            list-style-type: none;
+        }
+
+        section.aside .speakers input {
+            color: azure;
+            width: 100%;
+            border: 0;
         }
 
         div.raw {
@@ -163,11 +175,12 @@
                 <div id="infoTranscriptContainer" class="info"></div>
             </details>
             <hr />
-            <aside id="speakersContainer" class="speakers aside">
+            <details id="speakersContainer" open class="speakers aside">
                 <summary>Speakers</summary>
+                <hr />
                 <ul>
                 </ul>
-            </aside>
+            </details>
         </section>
     </main>
 </body>
@@ -346,13 +359,15 @@
             case 'set':
                 let speaker = speakers.get(result);
                 let speakersListItem = speakersList.querySelector(`#${result}`);
+                let speakerIndex = Array.from(speakers.keys()).indexOf(speaker.speakerName)+1;
 
                 if(!speakersListItem) {
                     speakersListItem = speakersList.appendChild(document.createElement('li'));
-                    speakersListItem.classList.add(`speaker-${Array.from(speakers.keys()).indexOf(speaker.speakerName)+1}`);
+                    speakersListItem.classList.add(`speaker-${speakerIndex}`);
                     let speakerElement = speakersListItem.appendChild(document.createElement('input'));
                     speakerElement.id = result;
                     speakerElement.type = "text"
+                    speakerElement.classList.add(`speaker-${speakerIndex}`)
                     speakerElement.value = speaker.speakerName;
                     // speakerElement.onclick = handleSpeakerSelected;
                     speakerElement.onchange = e => speaker.speakerName = e.target.value;
