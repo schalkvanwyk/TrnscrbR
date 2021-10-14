@@ -1,17 +1,26 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="utf-8" />
     <title>Trnscrbr - A Transcribe Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <style>
+        html {
+            height: 100vh;
+        }
+
         body main {
             display: grid;
             grid-template-columns: 2fr 1fr;
             grid-auto-rows: 72px;
+            height: 100vh;
         }
 
         section.transcript {
             grid-column: 1 / 3;
             grid-row: 1 / 12;
-            column-width: 70%;
+            column-width: 70vw;
             min-width: 385px;
         }
 
@@ -33,24 +42,30 @@
             padding: 0;
         }
 
+        section.aside ol {
+            margin: 0 0 0 50px;
+            padding: 0;
+        }
+
         section.aside .speakers ul {
             color: azure;
+            width: 98%;
             list-style-type: none;
         }
 
         section.aside .speakers input {
             color: azure;
-            width: 100%;
+            width: 98%;
             border: 0;
         }
 
         div.raw {
-            height: 20%;
+            height: 20vh;
             overflow: auto;
         }
 
         div.segmented {
-            height: 60%;
+            height: 60vh;
             overflow-wrap: break-word;
             overflow-x: auto;
             overflow-y: auto;
@@ -636,14 +651,14 @@
     }
 
     function handleSpeaking(e) {
-        let currentTime = Number(e.detail).toFixed(2);
-        let startTime = Number(startTimes[0]).toFixed(2);
+        let currentTime = Number(Number(e.detail).toFixed(2));
+        let startTime = Number(Number(startTimes[0]).toFixed(2));
 
         // console.log(`${currentTime} | ${startTime}`);
 
         if(currentTime > startTime){
             lastStartTime = startTimes.shift();
-            startTime = Number(startTimes[0]).toFixed(2);
+            startTime = Number(Number(startTimes[0]).toFixed(2));
             previousDialogue = currentDialogue;
         } 
         else return;
