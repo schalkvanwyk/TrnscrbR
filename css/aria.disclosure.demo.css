@@ -7,7 +7,7 @@
 
 body{overflow-x: hidden; padding-left: 0em; transition: padding-left .2s ease-in-out}
 body,html{background:#fafafa;color:#450c13;font-family: arial;line-height:1.3;margin:0;padding:0;}
-.page{padding:20px;margin:auto; max-width:1200px;}
+.page{padding:20px;margin:auto; max-width:100vw;}
 
 header {
   border-bottom: 1px solid #999;
