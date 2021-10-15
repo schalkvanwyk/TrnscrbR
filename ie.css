@@ -1,0 +1,9 @@
+#transcript > li{
+  -webkit-filter: blur(3px);
+  filter: blur(3px);
+  transition: all .8s ease;
+}
+.speaking{
+  -webkit-filter: blur(0px);
+  filter:blur(0px);
+}

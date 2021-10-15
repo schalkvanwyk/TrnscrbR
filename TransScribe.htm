@@ -27,6 +27,7 @@
     <link rel="stylesheet" type="text/css" href="css/aria.disclosure.css" />
     <link rel="stylesheet" type="text/css" href="css/aria.disclosure.demo.css" />
     <link rel="stylesheet" type="text/css" href="css/simptip.css" media="screen,projection" />
+    <!-- <link rel="stylesheet" type="text/css" href="css/mediacontrol.css" /> -->
     <link rel="stylesheet" type="text/css" href="css/main.css" />
 
     <meta name="theme-color" content="#fafafa" />
@@ -55,6 +56,7 @@
             color: rgb(248, 184, 184);
             font-size: 1rem;
             background-color: rgb(149, 21, 21);
+            opacity: 80%;
         }
 
         .toolButton {
@@ -77,9 +79,56 @@
             min-width: 385px;
         }
 
-        section.transcript p {
+        section.transcript div.raw {
+            height: 20vh;
+            overflow: auto;
+        }
+
+        section.transcript div.segmented {
+            height: 60vh;
+            overflow-wrap: break-word;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        section.transcript div.segmented p {
             line-height: 14px; /* within paragraph */
             margin: 2px; /* between paragraphs */
+        }
+
+        section.transcript div.segmented p div {
+            display: inline-block;
+        }
+
+        /* section.transcript div.segmented p q {
+            display: inline-block;
+            min-width: 79%;
+            background-color: cornsilk;
+        } */
+
+        section.transcript div.segmented p span.segmentLabel {
+            color: azure;
+            height: 22px;
+            display: inline-block;
+        }
+        section.transcript div.segmented p span.dialogue {
+            -webkit-filter: blur(1.2px);
+            filter: blur(1.2px);
+            transition: all 0.2s ease;
+        }
+        section.transcript div.segmented p span.punctuation {
+            -webkit-filter: blur(0.8px);
+            filter: blur(0.8px);
+        }
+        section.transcript div.segmented p span.speaking {
+            background-color: yellow;
+            -webkit-filter: blur(0px);
+            filter:blur(0px);
+        }
+        section.transcript div.segmented p span.spoke {
+            background-color: lightyellow;
+            -webkit-filter: blur(0.5px);
+            filter: blur(0.5px);
         }
 
         section.aside {
@@ -92,7 +141,7 @@
         }
 
         section.aside.info {
-            grid-row: 6;
+            grid-row: 7;
         }
 
         section.aside ul {
@@ -115,50 +164,7 @@
             color: azure;
             width: 98%;
             border: 0;
-        }
-
-        div.raw {
-            height: 20vh;
-            overflow: auto;
-        }
-
-        div.segmented {
-            height: 60vh;
-            overflow-wrap: break-word;
-            overflow-x: auto;
-            overflow-y: auto;
-        }
-
-        div.segmented p {
-            background-color: cornsilk;
-        }
-
-        div.segmented p span.segmentLabel {
-            color: azure;
-            height: 20px;
-            display: inline-block;
-        }
-
-        div.segmented p span.dialogue {
-            -webkit-filter: blur(1.2px);
-            filter: blur(1.2px);
-            transition: all 0.2s ease;
-        }
-
-        div.segmented p span.punctuation {
-            -webkit-filter: blur(0.8px);
-            filter: blur(0.8px);
-        }
-
-        div.segmented p span.speaking {
-            background-color: yellow;
-            -webkit-filter: blur(0px);
-            filter:blur(0px);
-        }
-        div.segmented p span.spoke {
-            background-color: lightyellow;
-            -webkit-filter: blur(0.5px);
-            filter: blur(0.5px);
+            opacity: 100%;
         }
 
         div.file-name {
@@ -168,30 +174,39 @@
 
         .speaker-1 {
             background-color: darkgoldenrod;
+            opacity: 75%;
         }
         .speaker-2 {
             background-color: darkgreen;
+            opacity: 75%;
         }
         .speaker-3 {
             background-color: darkblue;
+            opacity: 75%;
         }
         .speaker-4 {
             background-color: darkcyan;
+            opacity: 75%;
         }
         .speaker-5 {
             background-color: darksalmon;
+            opacity: 75%;
         }
         .speaker-6 {
             background-color: darkslateblue;
+            opacity: 75%;
         }
         .speaker-7 {
             background-color: darkolivegreen;
+            opacity: 75%;
         }
         .speaker-8 {
             background-color: darkkhaki;
+            opacity: 75%;
         }
         .speaker-9 {
             background-color: darkseagreen;
+            opacity: 75%;
         }
     </style>
 
@@ -351,91 +366,9 @@
             return min + ":" + sec;
         }
     </script>
-
-    <!-- Events.mjs -->
-    <!-- <script type="module">
-        const EVENT_DISPLAY_ERROR_MESSAGE = "display-errormessage";
-        // const EVENT_DELETE_TODO = "delete-todo";
-
-        export function dispatchDisplayErrorMessage(message) {
-            window.dispatchEvent(
-                new CustomEvent(EVENT_DISPLAY_ERROR_MESSAGE, {
-                    detail: message,
-                })
-            );
-        }
-
-        export function listenForDisplayErrorMessage(fn) {
-            window.addEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
-        }
-
-        export function removeDisplayErrorMessageListener(fn) {
-            window.removeEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
-        }
-
-        /*
-        export function dispatchDeleteTodo(id) {
-            window.dispatchEvent(
-                new CustomEvent(EVENT_DELETE_TODO, {
-                    detail: id,
-                })
-            );
-        }
-
-        export function listenForDeleteTodo(fn) {
-            window.addEventListener(EVENT_DELETE_TODO, fn);
-        }
-
-        export function removeDeleteTodoListener(fn) {
-            window.removeEventListener(EVENT_DELETE_TODO, fn);
-        }
-        */
-    //< /script>
-
-    //< ! -- ErrorMsngR.mjs - - >
-    //< ! - - <script type="module"> - - >
-        // import {
-        //     listenForDisplayErrorMessage,
-        //     removeDisplayErrorMessageListener,
-        // } from "./Events.js";
-
-        export class ErrorMsngR extends HTMLElement {
-            constructor() {
-                super();
-            }
-
-            connectedCallback() {
-                this.classList.add("Trnscrbr-ErrorContainer");
-                listenForDisplayErrorMessage(this._display.bind(this));
-            }
-
-            disconnectedCallback() {
-                removeDisplayErrorMessageListener(this._display.bind(this));
-            }
-
-            /******************************************************************************
-             * Private methods
-             *****************************************************************************/
-
-            _display(e) {
-                const message = e.detail;
-
-                let p = document.createElement("p");
-                p.innerText = message;
-
-                this.insertAdjacentElement("beforeend", p);
-
-                setTimeout(() => {
-                    this.removeChild(p);
-                }, 3000);
-            }
-        }
-
-        customElements.define("error-msngr", ErrorMsngR);    
-    </script> -->
 </head>
 <header>
-    <h1><abbr>Trnscrbr</abbr> - Transcription Viewer</h1>
+    <h1><abbr>Trnscrbr</abbr> - A Transcription Viewer</h1>
     <!-- <hr /> -->
     <!-- <template>
         <h1>Hello Trnscrbr!</h1>
@@ -536,16 +469,13 @@
 
     <main class="page" aria-label="Transcript Workspace">
         <section id="transcriptSection" class="transcript">
-            <h1>Transcript</h1>
-            <span>
-                <button id="clearTranscripts" name="Clear" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Reset and clear loaded transcript data." onclick="handleClearTranscripts(event)">Clear</button>
-            </span>
+            <h1>Transcript <button id="clearTranscripts" name="Clear" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Reset and clear loaded transcript data." onclick="handleClearTranscripts(event)">Clear</button></h1>
             <hr />
-            <span>
-                <label for="transcriptFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the transcript file">Select the transcript file</label>
-                <input id="transcriptFileSource" name="transcriptFileSource" class="file-input hidden" type="file" accept=".json, text/json" />
-            </span>
-            <div id="transcriptFileName" class="file-name">No file selected</div>
+            <label for="transcriptFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the transcript file">
+                Select the transcript file
+                <div id="transcriptFileName" class="file-name">No file selected</div>
+            </label>
+            <input id="transcriptFileSource" name="transcriptFileSource" class="file-input hidden" type="file" accept=".json, text/json" />
             <error-msngr></error-msngr>
             <hr />
             <div class="workspaceContainer">
@@ -563,18 +493,37 @@
             <hr />
             <figure id="mediaContainer">
                 <figcaption>
-                    <label for="mediaFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the media file">Select the media file</label>
+                    <label for="mediaFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the media file">
+                        <p>Select the media file</p>
+                        <div id="mediaFileName" class="file-name">No File</div>
+                    </label>
                     <input id="mediaFileSource" class="file-input hidden" type="file" name="mediaFileSource" />
                 </figcaption>
-                <video id="mediaPlayer" width="250px" controls
+                <!-- https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/Video_player_styling_basics -->
+                <video id="mediaPlayer" width="100%" preload="metadata" controls
                         ontimeupdate="handleMediaTimeUpdated(event)" 
                         onplay="handleMediaPlay(event)" 
                         onended="handleMediaEnded(event)" 
                         onseeked="handleMediaSeeked(event)">
                     Your browser does not support the <code>video</code>/<code>audio</code> element.
                 </video>
+                <!-- <div id="video-controls" class="controls" data-state="hidden">
+                    <button id="playpause" type="button" data-state="play">Play/Pause</button>
+                    <button id="stop" type="button" data-state="stop">Stop</button>
+                    <div class="progress">
+                        <progress id="progress" value="0" min="0">
+                            <span id="progress-bar"></span>
+                        </progress>
+                    </div>
+                    <button id="mute" type="button" data-state="mute">Mute/Unmute</button>
+                    <button id="volinc" type="button" data-state="volup">Vol+</button>
+                    <button id="voldec" type="button" data-state="voldown">Vol-</button>
+                    <button id="fs" type="button" data-state="go-fullscreen">Fullscreen</button>
+                </div> -->
+                <figcaption>
+                    &copy;  | <a href=""></a>
+                </figcaption>
             </figure>
-            <div id="mediaFileName" class="file-name">No File</div>
             <hr />
         </section>
         <section id="transcriptInfo" class="info aside">
@@ -596,44 +545,11 @@
 
     <script src="js/plugins.js"></script>
     <script src="js/aria.disclosure.js"></script>
+    <!-- <script src="js/events.mjs" type="module"></script> -->
+    <!-- <script src="js/errormsngr.mjs" type="module"></script> -->
+    <!-- <script src="js/video-player.js"></script> -->
     <script src="js/main.js"></script>
   
-    <!-- https://javascript.plainenglish.io/create-your-first-web-component-using-vanilla-javascript-82a50cc742b0 -->
-    <!-- https://javascript.plainenglish.io/the-javascript-ecosystem-blog-1-vanilla-web-components-7d6960f34ff9 -->
-    <script type="text/javascript">
-        class MyComponent extends HTMLElement {
-            constructor() {
-                super();
-                this.addEventListener('click',
-                () => {
-                    this.style.color === 'red'
-                    ? this.style.color = 'blue':
-                    this.style.color = 'red';
-                });
-            }
-
-            connectedCallback() {
-                console.log('My Component is connected');
-
-                this.style.color = 'blue';
-                const template = 
-                    document.
-                    querySelector('template');
-                    
-                    const clone = 
-                    document.
-                    importNode(template.content,    
-                    true);
-                
-                // this.appendChild(clone);
-                this.attachShadow({ mode: 'open' });         
-                this.shadowRoot.appendChild(clone); 
-            }
-        }
-
-        customElements.define('my-component', MyComponent)
-    </script>
-
     <!-- Events.mjs -->
     <script type="text/javascript">
         const EVENT_DISPLAY_ERROR_MESSAGE = "display-errormessage";
@@ -759,12 +675,13 @@
         switch (method) {
             case 'set':
                 let speaker = speakers.get(result);
-                let speakersListItem = speakersList.querySelector(`#${result}`);
+                let speakersListItem = speakersList.querySelector(`#speaker_${result}`);
                 let speakerIndex = Array.from(speakers.keys()).indexOf(speaker.speakerName)+1;
 
                 if(!speakersListItem) {
-                    speakersListItem = speakersList.appendChild(document.createElement('li'));
+                    speakersListItem = document.createElement('li');
                     speakersListItem.classList.add(`speaker-${speakerIndex}`);
+                    
                     let speakerElementLabel = speakersListItem.appendChild(document.createElement('label'));
                     speakerElementLabel.htmlFor = result;
                     speakerElementLabel.innerText = "Speaker Name";
@@ -772,30 +689,28 @@
                     speakerElementLabel.classList.add("simptip-info");
                     speakerElementLabel.classList.add("simptip-position-top");
                     speakerElementLabel.dataset.tooltip = "Update speaker name";
+                    
                     let speakerElement = speakersListItem.appendChild(document.createElement('input'));
-                    speakerElement.id = result;
+                    speakerElement.id = "speaker_" + result;
                     speakerElement.type = "text"
                     speakerElement.classList.add(`speaker-${speakerIndex}`)
                     speakerElement.value = speaker.speakerName;
                     // speakerElement.onclick = handleSpeakerSelected;
                     speakerElement.onchange = e => speaker.speakerName = e.target.value;
-                    speaker.speakerObserver.Observe(newValue => {
-                        let speakerSectionLabels = document.querySelectorAll(`span[data-speaker=${result}]`);
+                    
+                    speaker.getSpeakerObserver().Observe(newValue => {
+                        let speakerSectionLabels = document.querySelectorAll(`dfn[data-speaker=${result}]`);
                         speakerSectionLabels.forEach(element => {
                             element.innerText = newValue;
                         });
                     });
 
                     let speakerSegmentsList = speakersListItem.appendChild(document.createElement('details')).appendChild(document.createElement('ol'));
-                    // let speakerItems = speaker.segments.reduce((p, c) => {
-                    //     if(p) {
-                    //         p.end_time = c.end_time;
-                    //         p.items.join(c.items);
-                    //     }
-                    // });
                     speaker.segments.forEach(segment => {
                         speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${secondsToTime(segment.start_time)}-${secondsToTime(segment.end_time)}`;
                     });
+
+                    speakersList.appendChild(speakersListItem);
                 } else {
                     let speakerSegmentsList = speakersListItem.parentNode.querySelector('ol');
                     // let speakerItems = speaker.segments.reduce((p, c) => {
@@ -947,9 +862,16 @@
 
         transcriptSegments.forEach((segment, index) => {
             if(!transcriptSpeakers.has(segment.speaker_label)){
-                let speaker = { speakerName: segment.speaker_label, segments: [segment] };
-                speaker.speakerObserver = new Observer(speaker, "speakerName");
-                speaker.speakerName = segment.speaker_label;
+                let speaker = { 
+                    speakerName: segment.speaker_label, 
+                    segments: [segment], 
+                    _speakerObserver: null,
+                    getSpeakerObserver: function() {
+                        if(!this._speakerObserver) this._speakerObserver = new Observer(this, "speakerName");
+
+                        return this._speakerObserver;
+                    }
+                };
 
                 transcriptSpeakers.set(segment.speaker_label, speaker);
             } else {
@@ -971,25 +893,19 @@
             segmentEditTool.dataset.tooltip= "Click to edit";
             segmentEditTool.onclick = handleSegmentLabelClick;
 
-            let segmentLabelTemplate = document.createElement('span');
-            segmentLabelTemplate.classList.add(`segmentLabel`);
-            segmentLabelTemplate.classList.add(`speaker-${speakerIndex}`);
-            segmentLabelTemplate.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
+            let segmentLabelContainer = segmentContainer.appendChild(document.createElement('span'));
+            segmentLabelContainer.classList.add(`segmentLabel`);
+            segmentLabelContainer.classList.add(`speaker-${speakerIndex}`);
+            segmentLabelContainer.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
+            segmentLabelContainer.onclick = handleSegmentLabelClick;
+            segmentLabelContainer.innerHTML = `<dfn id="${segment.speaker_label}_segment_${index}" data-speaker="${segment.speaker_label}">${segment.speaker_label}</dfn> (<time>${secondsToTime(segment.start_time)}</time> - <time>${secondsToTime(segment.end_time)}</time>):`;
 
-            let segmentLabel = segmentContainer.appendChild(segmentLabelTemplate.cloneNode(true));
-            segmentLabel.dataset.speaker = segment.speaker_label;
-            segmentLabel.textContent = `${segment.speaker_label}`;
-            segmentLabel.onclick = handleSegmentLabelClick;
-
-            let segmentLabel2 = segmentContainer.appendChild(segmentLabelTemplate.cloneNode(true));
-            segmentLabel2.textContent = ` (${secondsToTime(segment.start_time)} - ${secondsToTime(segment.end_time)}):`;
-            segmentLabel2.onclick = handleSegmentLabelClick;
-
+            let segmentItemsContainer = segmentContainer.appendChild(document.createElement('q'));
             let segmentItems = transcriptItems.filter(item => item.dataset.start_time >= segmentStartTime && item.dataset.end_time <= segmentEndTime);
             segmentItems.forEach(segmentItem => {
-                if(segmentItem.dataset.type !== 'punctuation') segmentContainer.appendChild(document.createTextNode(' '));
+                if(segmentItem.dataset.type !== 'punctuation') segmentItemsContainer.appendChild(document.createTextNode(' '));
                 else segmentItem.classList.add('punctuation');
-                segmentContainer.appendChild(segmentItem);
+                segmentItemsContainer.appendChild(segmentItem);
             });
 
             segmentsContainer.appendChild(segmentContainer);
@@ -1018,9 +934,9 @@
     function handleMediaSeeked(e) {
         if(!transcriptData) return;
 
-        transcriptWrapper.querySelectorAll('p>span').forEach(o => {
+        transcriptWrapper.querySelectorAll('span.dialog').forEach(o => {
             o.classList.remove('speaking');
-            o.classList.remove('spoke');
+            // o.classList.remove('spoke');
         });
 
         let currentTime = e.target.currentTime;
@@ -1065,8 +981,9 @@
 
         if(lastStartTime > currentTime) return;
 
-        currentDialogue = transcriptWrapper.querySelector(`p>span[id="segment_item_${Math.round(startTime * 1000)}"]`);
+        currentDialogue = transcriptWrapper.querySelector(`#segment_item_${Math.round(startTime * 1000)}`);
         if(currentDialogue) {
+            currentDialogue.classList.remove('spoke');
             currentDialogue.classList.add('speaking');
             previousDialogue?.classList.remove('speaking');
             previousDialogue?.classList.add('spoke');
