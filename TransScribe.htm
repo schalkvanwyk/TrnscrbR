@@ -1,10 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="no-js" lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Trnscrbr - A Transcribe Viewer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!-- <meta http-equiv="x-ua-compatible" content="ie=edge" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="AWS Transcription Viewer" />
+
+    <title>Trnscrbr - A Transcription Viewer</title>
+
+    <!-- Control the behavior of search engine crawling and indexing -->
+    <meta name="robots" content="noindex,nofollow,nosnippet"><!-- All Search Engines -->
+    <meta name="googlebot" content="noindex,nofollow,nosnippet"><!-- Google Specific -->
+
+    <!-- Tells Google not to show the sitelinks search box -->
+    <meta name="google" content="nositelinkssearchbox">
+
+    <!-- Tells Google not to provide a translation for this document -->
+    <meta name="google" content="notranslate">
+
+    <script>
+      // remove no-js and add 'js' to the HTML
+      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    </script>
+    
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/aria.disclosure.css" />
+    <link rel="stylesheet" type="text/css" href="css/aria.disclosure.demo.css" />
+    <link rel="stylesheet" type="text/css" href="css/simptip.css" media="screen,projection" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+
+    <meta name="theme-color" content="#fafafa" />
+
     <style>
         html {
             height: 100vh;
@@ -13,9 +39,36 @@
         body main {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            grid-auto-rows: 72px;
+            grid-auto-rows: 62px;
             height: 100vh;
         }
+
+        .Trnscrbr-ErrorContainer {
+            height: 25px;
+            width: 100%;
+            display: block;
+            float: inline-start;
+            justify-content: center;
+            align-items: center;
+            vertical-align: middle;
+            text-align: center;
+            color: rgb(248, 184, 184);
+            font-size: 1rem;
+            background-color: rgb(149, 21, 21);
+        }
+
+        .toolButton {
+            border: none;
+            background-color: inherit;
+            padding: 4px 4px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        /* .file-input {
+
+        } */
 
         section.transcript {
             grid-column: 1 / 3;
@@ -24,17 +77,22 @@
             min-width: 385px;
         }
 
+        section.transcript p {
+            line-height: 14px; /* within paragraph */
+            margin: 2px; /* between paragraphs */
+        }
+
         section.aside {
             grid-column: 3 / 3;
             max-width: 335px;
         }
 
-        section.aside.audio {
+        section.aside.mediaPlayer {
             grid-row: 1;
         }
 
         section.aside.info {
-            grid-row: 5;
+            grid-row: 6;
         }
 
         section.aside ul {
@@ -72,11 +130,13 @@
         }
 
         div.segmented p {
-            background-color: coral;
+            background-color: cornsilk;
         }
 
         div.segmented p span.segmentLabel {
             color: azure;
+            height: 20px;
+            display: inline-block;
         }
 
         div.segmented p span.dialogue {
@@ -134,24 +194,359 @@
             background-color: darkseagreen;
         }
     </style>
+
+    <script type="text/javascript">
+        // Whole-script strict mode syntax
+        'use strict';
+
+        //https://www.wintellect.com/data-binding-pure-javascript/
+        function Binding(b) {
+            _this = this
+            this.elementBindings = []
+            this.value = b.object[b.property]
+            this.valueGetter = function(){
+                return _this.value;
+            }
+            this.valueSetter = function(val){
+                _this.value = val
+                for (var i = 0; i < _this.elementBindings.length; i++) {
+                    var binding=_this.elementBindings[i]
+                    binding.element[binding.attribute] = val
+                }
+            }
+            this.addBinding = function(element, attribute, event){
+                var binding = {
+                    element: element,
+                    attribute: attribute
+                }
+                if (event){
+                    element.addEventListener(event, function(event){
+                        _this.valueSetter(element[attribute]);
+                    })
+                    binding.event = event
+                }       
+                this.elementBindings.push(binding)
+                element[attribute] = _this.value
+                return _this
+            }
+    
+            Object.defineProperty(b.object, b.property, {
+                get: this.valueGetter,
+                set: this.valueSetter
+            }); 
+    
+            b.object[b.property] = this.value;
+        }
+    
+        //https://www.wintellect.com/how-to-implement-the-observer-pattern-with-objects-and-arrays-in-pure-javascript/
+        function Observer(o, property) {
+            var _this = this;
+            var value = o[property];
+            this.observers = [];
+            
+            this.Observe = function (notifyCallback){
+                _this.observers.push(notifyCallback);
+            }
+    
+            Object.defineProperty(o, property, {
+                set: function(val){
+                    _this.value = val;
+                    for(var i = 0; i < _this.observers.length; i++) _this.observers[i](val);
+                },
+                get: function(){
+                    return _this.value;
+                }
+            });
+        }
+        function ArrayObserver(a) {
+            var _this = this;
+            this.array = a;   
+            this.observers = [];
+    
+            this.Observe = function (notifyCallback){
+                _this.observers.push(notifyCallback);
+            }    
+    
+            a.push = function(obj){
+                var push = Array.prototype.push.apply(a, arguments);        
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "push");
+                return push;
+            }
+    
+            a.pop = function(){
+                var popped = Array.prototype.pop.apply(a, arguments);        
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](popped, "pop");
+                return popped;
+            }
+    
+            a.reverse = function() {
+                var result = Array.prototype.reverse.apply(a, arguments);
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "reverse");
+                return result;
+            };
+    
+            a.shift = function() {
+                var deleted_item = Array.prototype.shift.apply(a, arguments);
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](deleted_item, "shift");
+                return deleted_item;                        
+            };
+    
+            a.sort = function() {
+                var result = Array.prototype.sort.apply(a, arguments);
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "sort");
+                return result;
+            };
+    
+            a.splice = function(i, length, itemsToInsert) {
+                var returnObj
+                if(itemsToInsert){
+                    Array.prototype.slice.call(arguments, 2);
+                    returnObj = itemsToInsert;
+                }
+                else{
+                    returnObj = Array.prototype.splice.apply(a, arguments);
+                }
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](returnObj, "splice");
+                return returnObj;
+            };
+    
+            a.unshift = function() {
+                var new_length = Array.prototype.unshift.apply(a, arguments);
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](new_length, "unshift");
+                return arguments;
+            };
+                        
+        }
+        function MapObserver(m) {
+            var _this = this;
+            this.map = m;
+            this.observers = [];
+    
+            this.Observe = function (notifyCallback){
+                _this.observers.push(notifyCallback);
+            }
+    
+            m.set = function(obj){
+                var set = Map.prototype.set.apply(m, arguments);        
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "set");
+                return set;
+            }
+    
+            m.clear = function(obj){
+                var clear = Map.prototype.clear.apply(m);        
+                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "clear");
+                return clear;
+            }
+        }
+    
+        function secondsToTime(seconds){
+            // let hr  = Math.floor(seconds / 3600);
+            let sec = Math.floor(seconds);
+            sec = Math.floor( sec % 60 );
+            sec = sec >= 10 ? sec : '0' + sec;
+    
+            let min = Math.floor(seconds / 60);
+            min = min >= 10 ? min : '0' + min;
+    
+            return min + ":" + sec;
+        }
+    </script>
+
+    <!-- Events.mjs -->
+    <!-- <script type="module">
+        const EVENT_DISPLAY_ERROR_MESSAGE = "display-errormessage";
+        // const EVENT_DELETE_TODO = "delete-todo";
+
+        export function dispatchDisplayErrorMessage(message) {
+            window.dispatchEvent(
+                new CustomEvent(EVENT_DISPLAY_ERROR_MESSAGE, {
+                    detail: message,
+                })
+            );
+        }
+
+        export function listenForDisplayErrorMessage(fn) {
+            window.addEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
+        }
+
+        export function removeDisplayErrorMessageListener(fn) {
+            window.removeEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
+        }
+
+        /*
+        export function dispatchDeleteTodo(id) {
+            window.dispatchEvent(
+                new CustomEvent(EVENT_DELETE_TODO, {
+                    detail: id,
+                })
+            );
+        }
+
+        export function listenForDeleteTodo(fn) {
+            window.addEventListener(EVENT_DELETE_TODO, fn);
+        }
+
+        export function removeDeleteTodoListener(fn) {
+            window.removeEventListener(EVENT_DELETE_TODO, fn);
+        }
+        */
+    //< /script>
+
+    //< ! -- ErrorMsngR.mjs - - >
+    //< ! - - <script type="module"> - - >
+        // import {
+        //     listenForDisplayErrorMessage,
+        //     removeDisplayErrorMessageListener,
+        // } from "./Events.js";
+
+        export class ErrorMsngR extends HTMLElement {
+            constructor() {
+                super();
+            }
+
+            connectedCallback() {
+                this.classList.add("Trnscrbr-ErrorContainer");
+                listenForDisplayErrorMessage(this._display.bind(this));
+            }
+
+            disconnectedCallback() {
+                removeDisplayErrorMessageListener(this._display.bind(this));
+            }
+
+            /******************************************************************************
+             * Private methods
+             *****************************************************************************/
+
+            _display(e) {
+                const message = e.detail;
+
+                let p = document.createElement("p");
+                p.innerText = message;
+
+                this.insertAdjacentElement("beforeend", p);
+
+                setTimeout(() => {
+                    this.removeChild(p);
+                }, 3000);
+            }
+        }
+
+        customElements.define("error-msngr", ErrorMsngR);    
+    </script> -->
 </head>
 <header>
-    <h1>Transcription Viewer</h1>
-    <hr />
+    <h1><abbr>Trnscrbr</abbr> - Transcription Viewer</h1>
+    <!-- <hr /> -->
+    <!-- <template>
+        <h1>Hello Trnscrbr!</h1>
+    </template>
+    <my-component></my-component> -->
 </header>
-<body>
-    <main>
+<body id="body">
+    <!-- <div id="page" class="page">
+        <div data-disclosure="A generated button">
+            <p data-disclosure-content>
+                This content will turn into a disclosure
+                once the script runs.
+            </p>
+        </div>
+
+        <div id="ex" data-disclosure data-disclosure-type="block">
+            <span data-disclosure-btn>
+            A full width "button"
+            </span>
+            <div data-disclosure-content>
+            <p>
+                Allows for a large hit area for the disclosure widget's
+                trigger.
+            </p>
+            <p>
+                <a href="#!">
+                This link is here just for focus testing.
+                </a>
+            </p>
+            </div>
+        </div>
+
+        <div id="ex2" data-disclosure data-disclosure-type="block" data-disclosure-open data-disclosure-class="test-class">
+            <h4>
+            <button data-disclosure-btn>
+                Disclosure button within a heading
+            </button>
+            </h4>
+            <div data-disclosure-content>
+            <p>
+                This disclosure widget is opened by default. Because that's a thing that should be able to happen.
+            </p>
+
+            <p>
+                Here's an example of a nested flyout disclosure widget:
+
+                <span data-disclosure="I'm a flyout!" data-disclosure-type="flyout">
+                <span data-disclosure-content>
+                    This example has a <a href="#">link within it</a>. Flyouts can
+                    be closed via the <kbd>ESC</kbd> key, as long as focus is on the <code>button</code> or within the revealed content.
+                    <br>
+                    Flyouts will auto-close if focus leaves the flyout.
+                </span>
+                </span>
+
+                All of this is contained within a single paragraph.
+            </p>
+
+            <p>
+                Here's an example of yet another flyout disclosure widget because testing:
+
+                <span data-disclosure="I'm another flyout!" data-disclosure-hover data-disclosure-type="flyout">
+                <span data-disclosure-content>
+                    This one doesn't have a link in it.
+                </span>
+                </span>
+
+                All of this is contained within a single paragraph.
+            </p>
+            </div>
+        </div>
+
+        <section>
+            <p>
+                This example showcases how a disclosure widget can be used to create
+                an off-site navigation. Using the <code>data-disclosure-manual-classes</code> to
+                not add any of the default classes to the widget, and to instead use totally custom
+                classes for the component.
+            </p>
+
+            <nav aria-label="example" id="my_nav" data-disclosure-type="flyout" data-disclosure data-disclosure-manual-classes>
+                <button data-disclosure-btn hidden>Menu</button>
+
+                <div data-disclosure-content>
+                    <ul>
+                        <li><a href="#">Link 1</a></li>
+                        <li><a href="#">Link 2</a></li>
+                        <li><a href="#">Link 3</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <p>
+                <a href="#">Focusable element after the navigation</a>.
+            </p>
+        </section>
+    </div> -->
+
+    <main class="page" aria-label="Transcript Workspace">
         <section id="transcriptSection" class="transcript">
             <h1>Transcript</h1>
+            <span>
+                <button id="clearTranscripts" name="Clear" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Reset and clear loaded transcript data." onclick="handleClearTranscripts(event)">Clear</button>
+            </span>
             <hr />
             <span>
-                <label for="transcriptFileSource">Load the transcript file</label>
-                <input id="transcriptFileSource" name="transcriptFileSource" class="file-input" type="file" accept=".json, text/json" />
+                <label for="transcriptFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the transcript file">Select the transcript file</label>
+                <input id="transcriptFileSource" name="transcriptFileSource" class="file-input hidden" type="file" accept=".json, text/json" />
             </span>
-            <span>
-                <button id="clearTranscripts" onclick="handleClearTranscripts(event)">Clear</button>
-            </span>
-            <span id="transcriptFileName" class="file-name">No File</span>
+            <div id="transcriptFileName" class="file-name">No file selected</div>
+            <error-msngr></error-msngr>
             <hr />
             <div class="workspaceContainer">
                 <div id="segmentedTranscriptContainer" class="segmented"></div>
@@ -163,206 +558,197 @@
                 <div id="rawTranscriptContainer" class="raw"></div>
             </details>
         </section>
-        <section id="audioSection" class="audio aside">
-            <h1>Audio</h1>
+        <section id="mediaSection" class="mediaPlayer aside">
+            <h1>Media</h1>
             <hr />
-            <figure id="audioContainer">
-                <figcaption>Audio file being transcribed</figcaption>
-                <audio id="audioPlayer" width="250px" controls
-                        ontimeupdate="handleAudioTimeUpdated(event)" 
-                        onplay="handleAudioPlay(event)" 
-                        onended="handleAudioEnded(event)" 
-                        onseeked="handleAudioSeeked(event)">
-                    Your browser does not support the <code>audio</code> element.
-                </audio>
-                <div>
-                    <label for="audioFileSource">Load the audio file</label>
-                    <input id="audioFileSource" class="file-input" type="file" name="audioFileSource" />
-                </div>
+            <figure id="mediaContainer">
+                <figcaption>
+                    <label for="mediaFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the media file">Select the media file</label>
+                    <input id="mediaFileSource" class="file-input hidden" type="file" name="mediaFileSource" />
+                </figcaption>
+                <video id="mediaPlayer" width="250px" controls
+                        ontimeupdate="handleMediaTimeUpdated(event)" 
+                        onplay="handleMediaPlay(event)" 
+                        onended="handleMediaEnded(event)" 
+                        onseeked="handleMediaSeeked(event)">
+                    Your browser does not support the <code>video</code>/<code>audio</code> element.
+                </video>
             </figure>
-            <div id="audioFileName" class="file-name">No File</div>
+            <div id="mediaFileName" class="file-name">No File</div>
             <hr />
         </section>
         <section id="transcriptInfo" class="info aside">
             <details class="info aside">
-                <summary>Transcript Information</summary>
+                <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the transcript file">Transcript Information</summary>
                 <hr />
                 <div id="infoTranscriptContainer" class="info"></div>
             </details>
             <hr />
             <details id="speakersContainer" open class="speakers aside">
-                <summary>Speakers</summary>
+                <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see speakers identified in the transcript">Speakers</summary>
                 <hr />
                 <ul>
                 </ul>
             </details>
+            <hr />
         </section>
     </main>
+
+    <script src="js/plugins.js"></script>
+    <script src="js/aria.disclosure.js"></script>
+    <script src="js/main.js"></script>
+  
+    <!-- https://javascript.plainenglish.io/create-your-first-web-component-using-vanilla-javascript-82a50cc742b0 -->
+    <!-- https://javascript.plainenglish.io/the-javascript-ecosystem-blog-1-vanilla-web-components-7d6960f34ff9 -->
+    <script type="text/javascript">
+        class MyComponent extends HTMLElement {
+            constructor() {
+                super();
+                this.addEventListener('click',
+                () => {
+                    this.style.color === 'red'
+                    ? this.style.color = 'blue':
+                    this.style.color = 'red';
+                });
+            }
+
+            connectedCallback() {
+                console.log('My Component is connected');
+
+                this.style.color = 'blue';
+                const template = 
+                    document.
+                    querySelector('template');
+                    
+                    const clone = 
+                    document.
+                    importNode(template.content,    
+                    true);
+                
+                // this.appendChild(clone);
+                this.attachShadow({ mode: 'open' });         
+                this.shadowRoot.appendChild(clone); 
+            }
+        }
+
+        customElements.define('my-component', MyComponent)
+    </script>
+
+    <!-- Events.mjs -->
+    <script type="text/javascript">
+        const EVENT_DISPLAY_ERROR_MESSAGE = "display-errormessage";
+
+        function dispatchDisplayErrorMessage(message) {
+            window.dispatchEvent(
+                new CustomEvent(EVENT_DISPLAY_ERROR_MESSAGE, {
+                    detail: message,
+                })
+            );
+        }
+
+        function listenForDisplayErrorMessage(fn) {
+            window.addEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
+        }
+
+        function removeDisplayErrorMessageListener(fn) {
+            window.removeEventListener(EVENT_DISPLAY_ERROR_MESSAGE, fn);
+        }
+    </script>
+
+    <!-- ErrorMsngR.mjs -->
+    <script type="text/javascript">
+        class ErrorMsngR extends HTMLElement {
+            constructor() {
+                super();
+            }
+
+            connectedCallback() {
+                // this.classList.add("Trnscrbr-ErrorContainer");
+                listenForDisplayErrorMessage(this._display.bind(this));
+            }
+
+            disconnectedCallback() {
+                removeDisplayErrorMessageListener(this._display.bind(this));
+            }
+
+            /******************************************************************************
+             * Private methods
+             *****************************************************************************/
+
+            _display(e) {
+                const message = e.detail;
+
+                let div = document.createElement("div");
+                div.innerText = message;
+                div.classList.add("Trnscrbr-ErrorContainer");
+                
+                this.insertAdjacentElement("beforeend", div);
+
+                setTimeout(() => {
+                    this.removeChild(div);
+                }, 3000);
+            }
+        }
+
+        customElements.define("error-msngr", ErrorMsngR);    
+    </script>
 </body>
 
-<script type="text/javascript" defer>
-    //https://www.wintellect.com/data-binding-pure-javascript/
-    function Binding(b) {
-        _this = this
-        this.elementBindings = []
-        this.value = b.object[b.property]
-        this.valueGetter = function(){
-            return _this.value;
-        }
-        this.valueSetter = function(val){
-            _this.value = val
-            for (var i = 0; i < _this.elementBindings.length; i++) {
-                var binding=_this.elementBindings[i]
-                binding.element[binding.attribute] = val
-            }
-        }
-        this.addBinding = function(element, attribute, event){
-            var binding = {
-                element: element,
-                attribute: attribute
-            }
-            if (event){
-                element.addEventListener(event, function(event){
-                    _this.valueSetter(element[attribute]);
-                })
-                binding.event = event
-            }       
-            this.elementBindings.push(binding)
-            element[attribute] = _this.value
-            return _this
-        }
+<!-- Disclosure demo https://github.com/scottaohara/aria_disclosure_widget -->
+<!-- <script type="text/javascript" defer>
+    var disclosure = '[data-disclosure]';
+    var els = document.querySelectorAll(disclosure);
 
-        Object.defineProperty(b.object, b.property, {
-            get: this.valueGetter,
-            set: this.valueSetter
-        }); 
-
-        b.object[b.property] = this.value;
+    // Generate all tab instances
+    for ( var i = 0; i < els.length; i++ ) {
+      var dis = new A11Ydisclosure( els[i] );
     }
 
-    //https://www.wintellect.com/how-to-implement-the-observer-pattern-with-objects-and-arrays-in-pure-javascript/
-    function Observer(o, property) {
-        var _this = this;
-        var value = o[property];
-        this.observers = [];
-        
-        this.Observe = function (notifyCallback){
-            _this.observers.push(notifyCallback);
-        }
+    // navigation example specific:
+    var body = document.getElementById('body');
+    var nav = document.getElementById('my_nav');
+    var navBtn = nav.querySelector('button');
+    var navBar = nav.querySelector('[data-disclosure-content]');
+    var expandedClass = 'nav-expanded';
 
-        Object.defineProperty(o, property, {
-            set: function(val){
-                _this.value = val;
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](val);
-            },
-            get: function(){
-                return _this.value;
-            }
-        });
-    }
-    function ArrayObserver(a) {
-        var _this = this;
-        this.array = a;   
-        this.observers = [];
+    navBtn.addEventListener('click', function () {
+      if ( body.classList.contains(expandedClass) ) {
+        closeNav();
+      }
+      else {
+        openNav()
+      }
+    });
 
-        this.Observe = function (notifyCallback){
-            _this.observers.push(notifyCallback);
-        }    
-
-        a.push = function(obj){
-            var push = Array.prototype.push.apply(a, arguments);        
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "push");
-            return push;
-        }
-
-        a.pop = function(){
-            var popped = Array.prototype.pop.apply(a, arguments);        
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](popped, "pop");
-            return popped;
-        }
-
-        a.reverse = function() {
-            var result = Array.prototype.reverse.apply(a, arguments);
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "reverse");
-            return result;
-        };
-
-        a.shift = function() {
-            var deleted_item = Array.prototype.shift.apply(a, arguments);
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](deleted_item, "shift");
-            return deleted_item;                        
-        };
-
-        a.sort = function() {
-            var result = Array.prototype.sort.apply(a, arguments);
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "sort");
-            return result;
-        };
-
-        a.splice = function(i, length, itemsToInsert) {
-            var returnObj
-            if(itemsToInsert){
-                Array.prototype.slice.call(arguments, 2);
-                returnObj = itemsToInsert;
-            }
-            else{
-                returnObj = Array.prototype.splice.apply(a, arguments);
-            }
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](returnObj, "splice");
-            return returnObj;
-        };
-
-        a.unshift = function() {
-            var new_length = Array.prototype.unshift.apply(a, arguments);
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](new_length, "unshift");
-            return arguments;
-        };
-                    
-    }
-    function MapObserver(m) {
-        var _this = this;
-        this.map = m;
-        this.observers = [];
-
-        this.Observe = function (notifyCallback){
-            _this.observers.push(notifyCallback);
-        }
-
-        m.set = function(obj){
-            var set = Map.prototype.set.apply(m, arguments);        
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "set");
-            return set;
-        }
-
-        m.clear = function(obj){
-            var clear = Map.prototype.clear.apply(m);        
-            for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "clear");
-            return clear;
-        }
+    var openNav = function () {
+      body.classList.add(expandedClass);
+      document.addEventListener('click', docClick, false);
     }
 
-    function secondsToTime(seconds){
-        // let hr  = Math.floor(seconds / 3600);
-        let sec = Math.floor(seconds);
-        sec = Math.floor( sec % 60 );
-        sec = sec >= 10 ? sec : '0' + sec;
-
-        let min = Math.floor(seconds / 60);
-        min = min >= 10 ? min : '0' + min;
-
-        return min + ":" + sec;
+    var closeNav = function () {
+      body.classList.remove(expandedClass);
     }
-</script>
+</script> -->
 
 <script type="text/javascript" defer>
-    document.getElementById('audioFileSource').addEventListener('change', handleAudioFileSelect, false);
+    // Whole-script strict mode syntax
+    'use strict';
+
+    document.getElementById('mediaFileSource').addEventListener('change', handleMediaFileSelect, false);
     document.getElementById('transcriptFileSource').addEventListener('change', handleJsonFileSelect, false);
-    // document.getElementById('audioPlayer').addEventListener('play', handlePlay, false);
+    // document.getElementById('mediaPlayer').addEventListener('play', handlePlay, false);
 
     const nbsp = document.createTextNode("\u00A0");
+    const meatballs = document.createElement("button");
+    meatballs.textContent = "\u2026"; //&#8230; &#x2026; &hellip;
+    meatballs.classList.add("toolButton");
+    const kebab = document.createElement("button");
+    kebab.textContent = "\u22EE"; //&#8942; &#x22EE; &vellip;
+    kebab.classList.add("toolButton");
+    // const hamburger = document.createTextNode("&#8801; &#x2261; &equiv;");
 
-    const audio = document.getElementById('audioPlayer');
-    // audio.muted = true;
+    const mediaPlayer = document.getElementById('mediaPlayer');
+    // mediaPlayer.muted = true;
 
     var transcriptData;
     var speakersList = document.querySelector('#speakersContainer>ul');
@@ -379,6 +765,13 @@
                 if(!speakersListItem) {
                     speakersListItem = speakersList.appendChild(document.createElement('li'));
                     speakersListItem.classList.add(`speaker-${speakerIndex}`);
+                    let speakerElementLabel = speakersListItem.appendChild(document.createElement('label'));
+                    speakerElementLabel.htmlFor = result;
+                    speakerElementLabel.innerText = "Speaker Name";
+                    speakerElementLabel.classList.add("hidden");
+                    speakerElementLabel.classList.add("simptip-info");
+                    speakerElementLabel.classList.add("simptip-position-top");
+                    speakerElementLabel.dataset.tooltip = "Update speaker name";
                     let speakerElement = speakersListItem.appendChild(document.createElement('input'));
                     speakerElement.id = result;
                     speakerElement.type = "text"
@@ -433,7 +826,7 @@
     const transcriptWrapperOffSetTop = transcriptWrapper.offsetTop;
     // transcriptWrapper.addEventListener("scroll", event => scrollOutput.textContent = `scrollTop: ${transcriptWrapper.scrollTop}`);
 
-    function handleAudioFileSelect(evt) {
+    function handleMediaFileSelect(evt) {
         var files = evt.target.files;
 
         for (var i = 0, f; f = files[i]; i++) {
@@ -445,9 +838,9 @@
             };
 
             // Warn user if file size is larger than 50mb
-            fileSize = Math.round(files[0].size / 1000000)
+            let fileSize = Math.round(files[0].size / 1000000)
             if (fileSize > 50.457280) {
-                alert('This audio file is ' + fileSize + 'mb. There may be playback issues above 50mb. For ways to reduce file size see the docs: https://github.com/smlum/scription#uploading-large-audio-files-to-scription');
+                alert('This media file is ' + fileSize + 'mb. There may be playback issues above 50mb. For ways to reduce file size see the docs: https://github.com/smlum/scription#uploading-large-audio-files-to-scription');
                 // TODO use Bulma modal instead of alert
                 // $('.modal-audio-size'){}
                 // return;
@@ -458,9 +851,9 @@
             // Closure to capture the file information.
             reader.onload = (function (theFile) {
                 return function (e) {
-                    document.getElementById('audioPlayer').src = e.target.result;
-                    console.log("loading audio: " + theFile.name);
-                    document.getElementById('audioFileName').innerHTML = theFile.name;
+                    document.getElementById('mediaPlayer').src = e.target.result;
+                    console.log("loading media: " + theFile.name);
+                    document.getElementById('mediaFileName').innerHTML = theFile.name;
                 };
             })(f);
 
@@ -571,6 +964,13 @@
 
             let segmentContainer = document.createElement('p');
 
+            let segmentEditTool = segmentContainer.appendChild(kebab.cloneNode(true));
+            segmentEditTool.classList.add("simptip-info");
+            segmentEditTool.classList.add("simptip-position-right");
+            segmentEditTool.dataset.bind = `transcriptResults.speaker_labels.segments[${index}].speaker_label`;
+            segmentEditTool.dataset.tooltip= "Click to edit";
+            segmentEditTool.onclick = handleSegmentLabelClick;
+
             let segmentLabelTemplate = document.createElement('span');
             segmentLabelTemplate.classList.add(`segmentLabel`);
             segmentLabelTemplate.classList.add(`speaker-${speakerIndex}`);
@@ -596,7 +996,7 @@
         });
     }
 
-    function handleAudioPlay(e) {
+    function handleMediaPlay(e) {
         if(!transcriptData) {
             e.preventDefault();
 
@@ -608,14 +1008,14 @@
         }
     }
 
-    function handleAudioEnded(e) {
+    function handleMediaEnded(e) {
         previousDialogue?.classList.remove('speaking');
         previousDialogue?.classList.add('spoke');
         currentDialogue?.classList.remove('speaking');
         currentDialogue?.classList.add('spoke');
     }
 
-    function handleAudioSeeked(e) {
+    function handleMediaSeeked(e) {
         if(!transcriptData) return;
 
         transcriptWrapper.querySelectorAll('p>span').forEach(o => {
@@ -644,7 +1044,7 @@
         transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: currentTime }));
     }
 
-    function handleAudioTimeUpdated(e) {
+    function handleMediaTimeUpdated(e) {
         if(!transcriptData || e.target.paused) return;
 
         transcriptWrapper.dispatchEvent(new CustomEvent('speaking', { detail: e.target.currentTime }));
@@ -692,19 +1092,23 @@
     }
 
     function handleSegmentLabelClick(e) {
-        alert(`Show Model: ${e.target.dataset.bind}`);
+        _displayError(`Show Model: ${e.target.dataset.bind}`);
+        // alert(`Show Model: ${e.target.dataset.bind}`);
     }
 
     function handleWordSelected(e) {
         previousDialogue = null;
         lastStartTime = null;
-        audio.currentTime = e.target.dataset.start_time/1000;
+        mediaPlayer.currentTime = e.target.dataset.start_time/1000;
     }
 
     function handleSpeakerSelected(e) {
         alert(`Show Model: ${e.target.id}`);
     }
     
+    function _displayError(message) {
+        dispatchDisplayErrorMessage(message);
+    }
 </script>
 
 </html>
