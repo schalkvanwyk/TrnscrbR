@@ -229,25 +229,28 @@
         }
     </style>
 
+    <!-- Common.js -->
     <script type="text/javascript">
         // Whole-script strict mode syntax
         'use strict';
 
+        //https://blog.jeremylikness.com/blog/client-side-javascript-databinding-without-a-framework/
+
         //https://www.wintellect.com/data-binding-pure-javascript/
+        //http://www.binaryintellect.net/articles/e86f1949-dad7-434f-b086-387b9f0c4f7b.aspx
         function Binding(b) {
-            _this = this
             this.elementBindings = []
             this.value = b.object[b.property]
             this.valueGetter = function(){
-                return _this.value;
-            }
+                return this.value;
+            }.bind(this);
             this.valueSetter = function(val){
-                _this.value = val
-                for (var i = 0; i < _this.elementBindings.length; i++) {
-                    var binding=_this.elementBindings[i]
+                this.value = val
+                for (var i = 0; i < this.elementBindings.length; i++) {
+                    var binding = this.elementBindings[i]
                     binding.element[binding.attribute] = val
                 }
-            }
+            }.bind(this);
             this.addBinding = function(element, attribute, event){
                 var binding = {
                     element: element,
@@ -255,14 +258,14 @@
                 }
                 if (event){
                     element.addEventListener(event, function(event){
-                        _this.valueSetter(element[attribute]);
-                    })
+                        this.valueSetter(element[attribute]);
+                    }.bind(this))
                     binding.event = event
                 }       
                 this.elementBindings.push(binding)
-                element[attribute] = _this.value
-                return _this
-            }
+                element[attribute] = this.value
+                return this
+            }.bind(this);
     
             Object.defineProperty(b.object, b.property, {
                 get: this.valueGetter,
@@ -274,62 +277,60 @@
     
         //https://www.wintellect.com/how-to-implement-the-observer-pattern-with-objects-and-arrays-in-pure-javascript/
         function Observer(o, property) {
-            var _this = this;
             var value = o[property];
             this.observers = [];
             
             this.Observe = function (notifyCallback){
-                _this.observers.push(notifyCallback);
-            }
+                this.observers.push(notifyCallback);
+            }.bind(this);
     
             Object.defineProperty(o, property, {
                 set: function(val){
-                    _this.value = val;
-                    for(var i = 0; i < _this.observers.length; i++) _this.observers[i](val);
-                },
+                    this.value = val;
+                    for(var i = 0; i < this.observers.length; i++) this.observers[i](val);
+                }.bind(this),
                 get: function(){
-                    return _this.value;
-                }
+                    return this.value;
+                }.bind(this)
             });
         }
         function ArrayObserver(a) {
-            var _this = this;
             this.array = a;   
             this.observers = [];
     
             this.Observe = function (notifyCallback){
-                _this.observers.push(notifyCallback);
-            }    
+                this.observers.push(notifyCallback);
+            }.bind(this);
     
             a.push = function(obj){
                 var push = Array.prototype.push.apply(a, arguments);        
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "push");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](obj, "push");
                 return push;
-            }
+            }.bind(this);
     
             a.pop = function(){
                 var popped = Array.prototype.pop.apply(a, arguments);        
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](popped, "pop");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](popped, "pop");
                 return popped;
-            }
+            }.bind(this);
     
             a.reverse = function() {
                 var result = Array.prototype.reverse.apply(a, arguments);
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "reverse");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](result, "reverse");
                 return result;
-            };
+            }.bind(this);
     
             a.shift = function() {
                 var deleted_item = Array.prototype.shift.apply(a, arguments);
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](deleted_item, "shift");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](deleted_item, "shift");
                 return deleted_item;                        
-            };
+            }.bind(this);
     
             a.sort = function() {
                 var result = Array.prototype.sort.apply(a, arguments);
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](result, "sort");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](result, "sort");
                 return result;
-            };
+            }.bind(this);
     
             a.splice = function(i, length, itemsToInsert) {
                 var returnObj
@@ -340,50 +341,173 @@
                 else{
                     returnObj = Array.prototype.splice.apply(a, arguments);
                 }
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](returnObj, "splice");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](returnObj, "splice");
                 return returnObj;
-            };
+            }.bind(this);
     
             a.unshift = function() {
                 var new_length = Array.prototype.unshift.apply(a, arguments);
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](new_length, "unshift");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](new_length, "unshift");
                 return arguments;
-            };
+            }.bind(this);
                         
         }
         function MapObserver(m) {
-            var _this = this;
             this.map = m;
             this.observers = [];
     
             this.Observe = function (notifyCallback){
-                _this.observers.push(notifyCallback);
-            }
+                this.observers.push(notifyCallback);
+            }.bind(this)
     
             m.set = function(obj){
                 var set = Map.prototype.set.apply(m, arguments);        
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "set");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](obj, "set");
                 return set;
-            }
+            }.bind(this)
     
             m.clear = function(obj){
                 var clear = Map.prototype.clear.apply(m);        
-                for(var i = 0; i < _this.observers.length; i++) _this.observers[i](obj, "clear");
+                for(var i = 0; i < this.observers.length; i++) this.observers[i](obj, "clear");
                 return clear;
+            }.bind(this);
+        }
+    
+        //https://netbasal.com/javascript-observables-under-the-hood-2423f760584
+        /*
+        class Observable {
+
+            constructor(functionThatThrowsValues) {
+                this._functionThatThrowsValues = functionThatThrowsValues;
+            }
+
+            subscribe(next, error, complete) {   
+                if (typeof next === "function") {   
+                    return this._functionThatThrowsValues({
+                        next,
+                        error: error || () => {},
+                        complete: complete || () => {}
+                    });
+                } else {
+                    return this._functionThatThrowsValues(next);
+                }
+            }
+
+            map(projectionFunction) { 
+                return new Observable(observer => {
+                    return this.subscribe({
+                        next(val) { observer.next(projectionFunction(val)) },
+                        error(e) { observer.error(e) } ,
+                        complete() { observer.complete() } 
+                    });
+                });
+            }
+            
+            mergeMap(anotherFunctionThatThrowsValues) {
+                return new Observable(observer => {
+                    return this.subscribe({
+                        next(val) {    
+                            anotherFunctionThatThrowsValues(val).subscribe({
+                                next(val) {observer.next(val)},
+                                error(e) { observer.error(e) } ,
+                                complete() { observer.complete() } 
+                            });
+                        },
+                        error(e) { observer.error(e) } ,
+                        complete() { observer.complete() } 
+                    });
+                });
+            }
+            
+            static fromArray(array) {
+                return new Observable(observer => {
+                    array.forEach(val => observer.next(val));
+                    observer.complete();
+                });
+            }
+
+            static fromEvent(element, event) {
+                return new Observable(observer => {
+                    const handler = (e) => observer.next(e);
+                    element.addEventListener(event, handler); 
+                    return () => {
+                        element.removeEventListener(event, handler);
+                    };
+                });
+            }
+            
+            static fromPromise(promise) {
+                return new Observable(observer => {
+                    promise.then(val => {
+                        observer.next(val); observer.complete();
+                    })
+                    .catch(e => {
+                        observer.error(val); observer.complete();
+                    });
+                })
             }
         }
-    
-        function secondsToTime(seconds){
-            // let hr  = Math.floor(seconds / 3600);
-            let sec = Math.floor(seconds);
-            sec = Math.floor( sec % 60 );
-            sec = sec >= 10 ? sec : '0' + sec;
-    
-            let min = Math.floor(seconds / 60);
-            min = min >= 10 ? min : '0' + min;
-    
-            return min + ":" + sec;
+        */
+
+        class TimeConversion {
+            static secondsToTime(seconds){
+                // let hr  = Math.floor(seconds / 3600);
+                let sec = Math.floor(seconds);
+                sec = Math.floor( sec % 60 );
+                sec = sec >= 10 ? sec : '0' + sec;
+        
+                let min = Math.floor(seconds / 60);
+                min = min >= 10 ? min : '0' + min;
+        
+                return min + ":" + sec;
+            }
         }
+
+        class HtmlElementWrapper {
+            constructor(element, text, display = true) {
+                this.element = document.createElement(element);
+                this.element.innerHTML = text;
+                this.display = !display;
+                this.toggleDisplay();
+            }
+            
+            click(val) {
+                this.element.addEventListener("click", () => val());
+                return this;
+            }
+            
+            showSelectable() {
+                this.element.style.cursor = "pointer";
+                return this;
+            }
+            
+            addClass(className) {
+                this.element.classList.add(className);
+                return this;
+            }
+            
+            toggleDisplay() {
+                this.display = !this.display;
+                this.element.style.display = this.display ? "" : "none";
+                return this;
+            }
+            
+            appendChild(child) {
+                this.element.appendChild(child.element);
+                return this;
+            }
+            
+            createChild(element, text, display = true) {
+                var wrapper = new Wrapper(element, text, display);
+                this.appendChild(wrapper);
+                return this;
+            }
+            
+            static generate(element, text, display = true) {
+                return new Wrapper(element, text, display);
+            }
+        }
+
     </script>
 </head>
 <header>
@@ -485,6 +609,22 @@
             </p>
         </section>
     </div> -->
+
+<!--
+<input id="testBindingInput" />
+<div id="testBinding"></div>
+<script>
+    var tbiData = {
+        myInput: "test"
+    };
+    new Binding({
+        object: tbiData,
+        property: "myInput"
+    })
+    .addBinding(document.getElementById("testBindingInput"), "value", "keyup")
+    .addBinding(document.getElementById("testBinding"), "innerHTML");
+</script>
+-->
 
     <main class="page" aria-label="Transcript Workspace">
         <section id="transcriptSection" class="transcript">
@@ -666,6 +806,10 @@
 </script> -->
 
 <script type="text/javascript" defer>
+    
+</script>
+
+<script type="text/javascript" defer>
     // Whole-script strict mode syntax
     'use strict';
 
@@ -726,7 +870,7 @@
 
                     let speakerSegmentsList = speakersListItem.appendChild(document.createElement('details')).appendChild(document.createElement('ol'));
                     speaker.segments.forEach(segment => {
-                        speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${secondsToTime(segment.start_time)}-${secondsToTime(segment.end_time)}`;
+                        speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`;
                     });
 
                     speakersList.appendChild(speakersListItem);
@@ -739,7 +883,7 @@
                     //     }
                     // });
                     let segment = speaker.segments[speaker.segments.length-1];
-                    speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${secondsToTime(segment.start_time)}-${secondsToTime(segment.end_time)}`;
+                    speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`;
                 }
                 break;
             case 'clear':
@@ -885,6 +1029,7 @@
                     speakerName: segment.speaker_label, 
                     segments: [segment], 
                     _speakerObserver: null,
+                    //TODO: Use bind()...?
                     getSpeakerObserver: function() {
                         if(!this._speakerObserver) this._speakerObserver = new Observer(this, "speakerName");
 
@@ -905,9 +1050,9 @@
 
             let segmentContainer = document.createElement('blockquote');
 
-            segmentContainer.appendChild(document.createElement("time")).textContent = secondsToTime(segment.start_time);
+            segmentContainer.appendChild(document.createElement("time")).textContent = TimeConversion.secondsToTime(segment.start_time);
             segmentContainer.appendChild(document.createTextNode(" - "));
-            segmentContainer.appendChild(document.createElement("time")).textContent = secondsToTime(segment.end_time);
+            segmentContainer.appendChild(document.createElement("time")).textContent = TimeConversion.secondsToTime(segment.end_time);
 
             let segmentEditTool = segmentContainer.appendChild(kebab.cloneNode(true));
             segmentEditTool.classList.add("simptip-info");
