@@ -1,7 +1,7 @@
 import {
     listenForDisplayErrorMessage,
     removeDisplayErrorMessageListener,
-} from "./js/events.js";
+} from "./../utils/events.mjs";
 
 export class ErrorMsngR extends HTMLElement {
     constructor() {
@@ -9,7 +9,7 @@ export class ErrorMsngR extends HTMLElement {
     }
 
     connectedCallback() {
-        this.classList.add("Trnscrbr-ErrorContainer");
+        // this.classList.add("Trnscrbr-ErrorContainer");
         listenForDisplayErrorMessage(this._display.bind(this));
     }
 
@@ -24,13 +24,14 @@ export class ErrorMsngR extends HTMLElement {
     _display(e) {
         const message = e.detail;
 
-        let p = document.createElement("p");
-        p.innerText = message;
+        let div = document.createElement("div");
+        div.innerText = message;
+        div.classList.add("Trnscrbr-ErrorContainer");
 
-        this.insertAdjacentElement("beforeend", p);
+        this.insertAdjacentElement("beforeend", div);
 
         setTimeout(() => {
-            this.removeChild(p);
+            this.removeChild(div);
         }, 3000);
     }
 }
