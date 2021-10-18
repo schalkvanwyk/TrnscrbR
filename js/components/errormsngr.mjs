@@ -1,7 +1,7 @@
 import {
     listenForDisplayErrorMessage,
     removeDisplayErrorMessageListener,
-} from "./../utils/events.mjs";
+} from "./events.mjs";
 
 export class ErrorMsngR extends HTMLElement {
     constructor() {

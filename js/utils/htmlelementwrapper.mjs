@@ -33,9 +33,14 @@ export class HtmlElementWrapper {
     }
     
     createChild(element, text, display = true) {
+        this.createChildAndUse(element, text, display);
+        return this;
+    }
+
+    createChildAndUse(element, text, display = true) {
         var wrapper = new HtmlElementWrapper(element, text, display);
         this.appendChild(wrapper);
-        return this;
+        return wrapper;
     }
     
     static generate(element, text, display = true) {
