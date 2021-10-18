@@ -6,8 +6,8 @@ export class HtmlElementWrapper {
         this.toggleDisplay();
     }
     
-    click(val) {
-        this.element.addEventListener('click', () => val());
+    click(handler) {
+        this.element.addEventListener('click', handler);
         return this;
     }
     
