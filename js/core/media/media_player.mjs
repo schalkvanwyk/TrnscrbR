@@ -16,22 +16,32 @@ import {
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/
 //https://www.webcomponents.org/community/articles/introduction-to-html-imports
 
-export var transcriptMediaPlayerLoader = (elementName) => {
-    fetch('./js/core/media/media_player.html')
-        .then(stream => stream.text())
-        .then(text => define(text));
+const loaderSettings = {
+    elementName: undefined,
+    templateLocation: './js/core/media/media_player.html',
+    mediaMetaDataRestAPIUri: 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR',
+    fileProvider: new MediaFileBlobProvider().loadBlobTo,
+    metaDataProvider: ({})
 }
 
-function define(template, elementName) {
+export var transcriptMediaPlayerLoader = (settings = loaderSettings) => {
+    settings.metaDataProvider = async () => {
+        let apiClient = new MediaMetaDataRestAPI(settings.mediaMetaDataRestAPIUri);
+        return await apiClient.getById(1);
+    };
+    
+    fetch(settings.templateLocation)
+        .then(stream => stream.text())
+        .then(text => define(text, settings));
+}
+
+function define(template, settings) {
     class TranscriptMediaPlayer extends HTMLElement {
         static #elementName = 'transcript-media-player';
         static #templateName = 'transcript-media-player-template';
         #template = {};
-        #fileProvider = new MediaFileBlobProvider().loadBlobTo;
-        #metaDataProvider = async () => {
-            let apiClient = new MediaMetaDataRestAPI('https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR');
-            return await apiClient.getById(1);
-        }; //({});
+        #fileProvider = settings.fileProvider || ({});
+        #metaDataProvider = settings.metaDataProvider || ({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
         #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
@@ -58,9 +68,9 @@ function define(template, elementName) {
                         return;
                     };
 
-                    //TODO: add to play list...?
                     MediaItem
                         .createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider)
+                        //TODO: add to play list...?
                         .then(mediaItem => { this.#mediaItems.push(mediaItem); });
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
                 });
@@ -128,12 +138,22 @@ function define(template, elementName) {
 
                 $this.mediaFileSelector.innerText = info.blobName;
 
-                let container = $('#mediaInfoContainer>ul', $this.shadowRoot);
+                let infoContainer = $('#mediaInfoContainer>ul', $this.shadowRoot);
 
-                heWrapper.generate('li', `Name: ${info.blobName}`, true, container);
-                heWrapper.generate('li', `Size: ${info.blobSize}`, true, container);
-                heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, container);
-                heWrapper.generate('li', `Mime Type: ${info.mimeType}`, true, container);
+                heWrapper.generate('li', `Name: ${info.blobName}`, true, infoContainer);
+                heWrapper.generate('li', `Size: ${info.blobSize}`, true, infoContainer);
+                heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, infoContainer);
+                heWrapper.generate('li', `Mime Type: ${info.mimeType}`, true, infoContainer);
+
+                let participantsContainer = $('#mediaParticipantsContainer>ol', $this.shadowRoot);
+                target.participants.forEach(participant => {
+                    heWrapper.generate('li', participant, true, participantsContainer);
+                });
+
+                let tagsContainer = $('#mediaTagsContainer>ul', $this.shadowRoot);
+                target.tags.forEach(tag => {
+                    heWrapper.generate('li', tag, true, tagsContainer);
+                });
             }
         }
 
@@ -211,5 +231,5 @@ function define(template, elementName) {
         // }
     }
 
-    customElements.define(elementName ?? TranscriptMediaPlayer.elementName, TranscriptMediaPlayer);
+    customElements.define(settings.elementName ?? TranscriptMediaPlayer.elementName, TranscriptMediaPlayer);
 }
