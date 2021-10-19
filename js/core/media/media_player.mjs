@@ -8,6 +8,7 @@ import {
 } from './../../utils/utils.mjs'
 import {
     MediaItem,
+    MediaMetaDataRestAPI,
     MediaFileBlobProvider
 } from './media.mjs';
 
@@ -27,7 +28,10 @@ function define(template, elementName) {
         static #templateName = 'transcript-media-player-template';
         #template = {};
         #fileProvider = new MediaFileBlobProvider().loadBlobTo;
-        #metaDataProvider = () => ({});
+        #metaDataProvider = async () => {
+            let apiClient = new MediaMetaDataRestAPI('https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR');
+            return await apiClient.getById(1);
+        }; //({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
         #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
@@ -39,12 +43,9 @@ function define(template, elementName) {
         }
 
         connectedCallback() {
-            if(!this.#template) return;
+            if(!this.#template) throw new Error('No Template! No template specified and could not load default template.');
 
             this.render();
-
-            //TODO: Improve with bindings...
-            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
 
             this.#addPlayerEventHandlers();
 
@@ -58,11 +59,15 @@ function define(template, elementName) {
                     };
 
                     //TODO: add to play list...?
-                    let mediaItem = MediaItem.createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider);
+                    MediaItem
+                        .createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider)
+                        .then(mediaItem => { this.#mediaItems.push(mediaItem); });
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
-                    this.#mediaItems.push(mediaItem);
                 });
             });
+
+            //TODO: Improve with bindings...
+            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
             
             $Id('mediaParticipantsContainer', this.shadowRoot).addEventListener('input', this.#mediaParticipantsChanged);
             this.#mediaParticipantsContainerObserver.observe(
@@ -119,6 +124,7 @@ function define(template, elementName) {
         #mediaItemsObserved(target, action, $this) {
             if (action === 'push') {
                 let info = target.info;
+                if(!info) return;
 
                 $this.mediaFileSelector.innerText = info.blobName;
 
