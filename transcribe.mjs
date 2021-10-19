@@ -105,7 +105,7 @@ var lastStartTime;
 var currentDialogue;
 var previousDialogue;
 
-const transcriptInfo = $id('infoTranscriptContainer');
+const transcriptInfo = $('#infoTranscriptContainer>ul');
 const transcriptWrapper = $id('segmentedTranscriptContainer');
 const transcriptWrapperOffSetTop = transcriptWrapper.offsetTop;
 // transcriptWrapper.addEventListener("scroll", event => scrollOutput.textContent = `scrollTop: ${transcriptWrapper.scrollTop}`);

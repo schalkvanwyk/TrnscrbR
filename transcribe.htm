@@ -146,20 +146,17 @@
             grid-template-columns: 2fr 1fr;
         }
 
-        section.aside ul {
+        section.aside .speakers ul {
             margin: 0 0 0 5px;
             padding: 0;
-        }
-
-        section.aside ol {
-            margin: 0 0 0 50px;
-            padding: 0;
-        }
-
-        section.aside .speakers ul {
             color: azure;
             width: 98%;
             list-style-type: none;
+        }
+
+        section.aside .speakers ol {
+            margin: 0 0 0 50px;
+            padding: 0;
         }
 
         section.aside .speakers input {
@@ -369,20 +366,19 @@
                 <div id="rawTranscriptContainer" class="raw"></div>
             </details>
         </section>
-        <section id="transcriptInfo" class="info aside">
-            <details class="info aside">
-                <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the transcript file">Transcript Information</summary>
+        <section id="transcriptInfo" class="aside">
+            <details>
+                <summary>Transcript Information <span style="float: left; padding-right: 5px;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the transcript file">?</span></summary>
                 <hr />
-                <div id="infoTranscriptContainer" class="info"></div>
+                <div id="infoTranscriptContainer" class="info">
+                    <ul></ul>
+                </div>
             </details>
-            <hr />
-            <details id="speakersContainer" open class="speakers aside">
-                <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see speakers identified in the transcript">Speakers</summary>
+            <details id="speakersContainer" class="speakers" open>
+                <summary>Speakers<span style="float: left; padding-right: 5px;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see speakers identified in the transcript">?</span></summary>
                 <hr />
-                <ul>
-                </ul>
+                <ul></ul>
             </details>
-            <hr />
         </section>
     </main>
 
