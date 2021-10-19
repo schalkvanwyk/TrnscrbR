@@ -17,6 +17,7 @@ export class MediaItem {
 
     info = {};
     metaData = {};
+    participants = [];
     tags = [];
 
     #loadMedia(source, target) {

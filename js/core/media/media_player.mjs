@@ -1,4 +1,8 @@
+
+// import html from './media_player.js'
 import {
+    $,
+    $Id,
     Binding,
     ArrayObserver,
     HtmlElementWrapper as heWrapper
@@ -8,6 +12,7 @@ import {
     MediaFileBlobProvider
 } from './media.mjs';
 
+//https://stackoverflow.com/a/55081177/26700
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/
 //https://www.webcomponents.org/community/articles/introduction-to-html-imports
 fetch('./js/core/media/media_player.html')
@@ -16,22 +21,25 @@ fetch('./js/core/media/media_player.html')
 
 function define(template) {
     class TranscriptMediaPlayer extends HTMLElement {
-        static #templateName = 'transcript-media-player-template';
+        static elementName = 'transcript-media-player';
+        static templateName = 'transcript-media-player-template';
         #template = {};
         #fileProvider = new MediaFileBlobProvider().loadBlobTo;
         #metaDataProvider = () => ({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
+        #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
 
         constructor() {
             super();
+            this.attachShadow({ mode: 'open' });
             this.#template = template;
         }
 
-        static get templateName() { return TranscriptMediaPlayer.#templateName; }
+        static get templateName() { return TranscriptMediaPlayer.templateName; }
 
         get mediaFileSelector() {
-            Object.defineProperty(this, "mediaFileSelector", { value: this.shadowRoot.getElementById('mediaFileName'), writable: false });
+            Object.defineProperty(this, "mediaFileSelector", { value: $Id('mediaFileName', this.shadowRoot), writable: false });
             return this.mediaFileSelector;
         }
 
@@ -47,53 +55,97 @@ function define(template) {
         }
 
         connectedCallback() {
-            let shadowRoot = this.attachShadow({ mode: 'open' });
-
-            let template = document
-                .getElementById(TranscriptMediaPlayer.#templateName)
-                ?.content;
-            if (template) {
-                shadowRoot.appendChild(template.cloneNode(true));
-            } else {
-                shadowRoot.innerHTML = this.#template;
-            }
-
-            let mediaInfos = heWrapper.generate('ul');
+            this.render();
 
             //TODO: Improve with bindings...
-            this.#mediaItemsObserver.Observe((t, a) => {
-                if (a === 'push') {
-                    this.mediaFileSelector.innerText = t.info.blobName;
-
-                    mediaInfos.createChild('li', `Name: ${t.info.blobName}`);
-                    mediaInfos.createChild('li', `Size: ${t.info.blobSize}`);
-                    mediaInfos.createChild('li', `Last Modified On: ${t.info.lastModifiedOn}`);
-                    mediaInfos.createChild('li', `Mime Type: ${t.info.mimeType}`);
-                }
-            });
+            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
 
             this.#addPlayerEventHandlers();
 
-            shadowRoot.getElementById('mediaFileSource')
-                .addEventListener('change', e => {
-                    var files = Array.from(e.target.files);
-                    files.forEach(file => {
-                        // Only process audio files.
-                        if (!file.type.match('audio.*')) {
-                            alert('Must be an audio file');
-                            return;
-                        };
+            $Id('mediaFileSource', this.shadowRoot)?.addEventListener('input', e => {
+                var files = Array.from(e.target.files);
+                files.forEach(file => {
+                    // Only process audio files.
+                    if (!file.type.match('audio.*')) {
+                        alert('Must be an audio file');
+                        return;
+                    };
 
-                        //TODO: add to play list...?
-                        this.#mediaItems.push(MediaItem.createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider));
-                    });
+                    //TODO: add to play list...?
+                    let mediaItem = MediaItem.createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider);
+                    // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
+                    this.#mediaItems.push(mediaItem);
                 });
+            });
             
-            shadowRoot.getElementById('mediaInfoContainer')?.appendChild(mediaInfos.element);
+            $Id('mediaParticipantsContainer', this.shadowRoot).addEventListener('input', this.#mediaParticipantsChanged);
+            this.#mediaParticipantsContainerObserver.observe(
+                $Id('mediaParticipantsContainer', this.shadowRoot), 
+                {
+                    attributes: true, 
+                    childList: true, 
+                    characterData: true
+                });
         }
 
         disconnectedCallback() {
             // removeDisplayErrorMessageListener(this._display.bind(this));
+        }
+
+        render() {
+            //Not working...
+            // let {cssContent, htmlContent} = this.#htmlToElement(html);
+            // this.shadowRoot.innerHTML = '';
+            // shadowRoot.appendChild(htmlContent);
+
+            let template = $Id(TranscriptMediaPlayer.templateName)?.content;
+            if (template) {
+                this.shadowRoot.appendChild(template.cloneNode(true));
+            } else {
+                this.shadowRoot.innerHTML = this.#template.trim();
+            }
+
+            let mediaInfos = heWrapper.generate('ul');
+            $Id('mediaInfoContainer', this.shadowRoot)?.appendChild(mediaInfos.element);
+        }
+
+        #mediaItemsObserved(target, action, $this) {
+            if (action === 'push') {
+                let info = target.info;
+
+                $this.mediaFileSelector.innerText = info.blobName;
+
+                let container = $('#mediaInfoContainer>ul', $this.shadowRoot);
+
+                heWrapper.generate('li', `Name: ${info.blobName}`, true, container);
+                heWrapper.generate('li', `Size: ${info.blobSize}`, true, container);
+                heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, container);
+                heWrapper.generate('li', `Mime Type: ${info.mimeType}`, true, container);
+            }
+        }
+
+        #mediaParticipantsChanged(event) {
+            switch (event.inputType) {
+                case 'insertParagraph':
+                    
+                    break;
+            
+                default:
+                    console.log(event);
+                    break;
+            }
+        }
+
+        #mediaParticipantsContainerMutated(mutations) {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    const listValues = Array.from(targetNode.children)
+                        .map(node => node.innerHTML)
+                        .filter(html => html !== '<br>');
+
+                    console.log(listValues);
+                }
+            });
         }
 
         #addPlayerEventHandlers() {
@@ -135,7 +187,16 @@ function define(template) {
                 }));
             });
         }
+
+        //Not working...
+        //https://roshan-khandelwal.medium.com/web-components-c7aef23fe478
+        // #htmlToElement(html) {
+        //     let template = this.shadowRoot.createElement('template');
+        //     template.innerHTML = html.trim(); // Never return a text node of whitespace as the result
+
+        //     return { cssContent : template.querySelector('head>style'), htmlContent: template.querySelector('body') };
+        // }
     }
     
-    customElements.define('transcript-media-player', TranscriptMediaPlayer);
+    customElements.define(TranscriptMediaPlayer.elementName, TranscriptMediaPlayer);
 }

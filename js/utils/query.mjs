@@ -1,5 +1,5 @@
-export function $id(idSelector) {
-    return document.getElementById(idSelector);
+export function $Id(idSelector, scope = document) {
+    return scope.getElementById(idSelector);
 }
 
 //https://sebastiandedeyne.com/javascript-framework-diet/selecting-elements-part-1/

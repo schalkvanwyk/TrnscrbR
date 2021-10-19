@@ -1,7 +1,7 @@
 import { 
     $,
     $$,
-    $id,
+    $Id,
     listen as listenFor,
     Observer,
     MapObserver,
@@ -102,7 +102,7 @@ var currentDialogue;
 var previousDialogue;
 
 const transcriptInfo = $('#infoTranscriptContainer>ul');
-const transcriptWrapper = $id('segmentedTranscriptContainer');
+const transcriptWrapper = $Id('segmentedTranscriptContainer');
 const transcriptWrapperOffSetTop = transcriptWrapper.offsetTop;
 // transcriptWrapper.addEventListener("scroll", event => scrollOutput.textContent = `scrollTop: ${transcriptWrapper.scrollTop}`);
 
@@ -119,7 +119,7 @@ function handleJsonFileSelect(evt) {
             return function (e) {
                 console.log(`loading json: ${theFile.name}`);
 
-                let transcriptFileName = $id('transcriptFileName');
+                let transcriptFileName = $Id('transcriptFileName');
                 if(transcriptFileName.firstChild?.nodeType === transcriptFileName.TEXT_NODE) transcriptFileName.removeChild(transcriptFileName.firstChild);
                 transcriptFileName.appendChild(document.createElement('li')).textContent = theFile.name;
                 
@@ -165,7 +165,7 @@ function populateTranscriptInfo(jobName, transcriptResults, speakerLabels) {
 }
 
 function populateRawTranscripts(transcripts) {
-    const rawTranscriptContainer = $id('rawTranscriptContainer');
+    const rawTranscriptContainer = $Id('rawTranscriptContainer');
     transcripts.forEach(transcriptItem => {
         rawTranscriptContainer.appendChild(heWrapper.generate('p', transcriptItem.transcript).element);
     });
@@ -198,7 +198,7 @@ function buildTranscriptItems(transcriptItems) {
 }
 
 function populateTranscriptSegments(transcriptSegments, transcriptSpeakers, transcriptItems) {
-    const segmentsContainer = $id('segmentedTranscriptContainer');
+    const segmentsContainer = $Id('segmentedTranscriptContainer');
 
     transcriptSegments.forEach((segment, index) => {
         if(!transcriptSpeakers.has(segment.speaker_label)){
@@ -344,10 +344,10 @@ function handleClearTranscripts(e) {
     lastStartTime = null;
     currentDialogue = null;
     previousDialogue = null;
-    $id('transcriptFileSource').value = null;
-    $id('infoTranscriptContainer').innerHTML = "";
-    $id('segmentedTranscriptContainer').innerHTML = "";
-    $id('rawTranscriptContainer').innerHTML = "";
+    $Id('transcriptFileSource').value = null;
+    $Id('infoTranscriptContainer').innerHTML = "";
+    $Id('segmentedTranscriptContainer').innerHTML = "";
+    $Id('rawTranscriptContainer').innerHTML = "";
     $$('#transcriptFileName>li').forEach(o => o.parentNode.removeChild(o));
 }
 
