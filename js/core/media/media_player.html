@@ -1,0 +1,49 @@
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+<style>
+    div.file-name {
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
+    figure {
+        padding: 0px;
+        margin: 0px;
+    }
+</style>
+<figure id="mediaContainer">
+    <figcaption>
+        <label for="mediaFileSource" class="simptip-info simptip-multiline simptip-position-top"
+            data-tooltip="Click to select and load the media file">
+            <p>Select the media file</p>
+            <div id="mediaFileName" class="file-name">No File</div>
+        </label>
+        <input id="mediaFileSource" class="file-input hidden" type="file" name="mediaFileSource" />
+    </figcaption>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/Video_player_styling_basics -->
+    <video id="mediaPlayer" height="150px" preload="metadata" controls>
+        Your browser does not support the <code>video</code>/<code>audio</code> element.
+    </video>
+    <!-- <div id="video-controls" class="controls" data-state="hidden">
+            <button id="playpause" type="button" data-state="play">Play/Pause</button>
+            <button id="stop" type="button" data-state="stop">Stop</button>
+            <div class="progress">
+                <progress id="progress" value="0" min="0">
+                    <span id="progress-bar"></span>
+                </progress>
+            </div>
+            <button id="mute" type="button" data-state="mute">Mute/Unmute</button>
+            <button id="volinc" type="button" data-state="volup">Vol+</button>
+            <button id="voldec" type="button" data-state="voldown">Vol-</button>
+            <button id="fs" type="button" data-state="go-fullscreen">Fullscreen</button>
+        </div> -->
+    <figcaption>
+        &copy; | <a href="#"></a>
+    </figcaption>
+</figure>
+<details class="info aside" open>
+    <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the media file">Media Information</summary>
+    <hr />
+    <div id="mediaInfoContainer" class="info">
+        <ul>
+        </ul>
+    </div>
+</details>

@@ -1,12 +1,20 @@
 import {
-    ArrayObserver
+    Binding,
+    ArrayObserver,
+    HtmlElementWrapper as heWrapper
 } from './../../utils/utils.mjs'
 import {
     MediaItem,
     MediaFileBlobProvider
 } from './media.mjs';
 
-customElements.define('transcript-media-player',
+//https://www.html5rocks.com/en/tutorials/webcomponents/imports/
+//https://www.webcomponents.org/community/articles/introduction-to-html-imports
+fetch('./js/core/media/media_player.html')
+    .then(stream => stream.text())
+    .then(text => define(text));
+
+function define(template) {
     class TranscriptMediaPlayer extends HTMLElement {
         static #templateName = 'transcript-media-player-template';
         #template = {};
@@ -17,18 +25,19 @@ customElements.define('transcript-media-player',
 
         constructor() {
             super();
+            this.#template = template;
         }
 
         static get templateName() { return TranscriptMediaPlayer.#templateName; }
 
-        get mediaFileSelector() { 
-            Object.defineProperty(this, "mediaFileSelector", { value: this.shadowRoot.getElementById('mediaFileName'), writable: false});
-            return this.mediaFileSelector; 
+        get mediaFileSelector() {
+            Object.defineProperty(this, "mediaFileSelector", { value: this.shadowRoot.getElementById('mediaFileName'), writable: false });
+            return this.mediaFileSelector;
         }
 
-        get mediaPlayer() { 
-            Object.defineProperty(this, "mediaPlayer", { value: this.shadowRoot.getElementById('mediaPlayer'), writable: false});
-            return this.mediaPlayer; 
+        get mediaPlayer() {
+            Object.defineProperty(this, "mediaPlayer", { value: this.shadowRoot.getElementById('mediaPlayer'), writable: false });
+            return this.mediaPlayer;
         }
 
         get currentTime() { return this.mediaPlayer.currentTime; }
@@ -40,16 +49,27 @@ customElements.define('transcript-media-player',
         connectedCallback() {
             let shadowRoot = this.attachShadow({ mode: 'open' });
 
-            this.template = document
+            let template = document
                 .getElementById(TranscriptMediaPlayer.#templateName)
-                .content;
-            if(!this.template) this.template = this.#template;
+                ?.content;
+            if (template) {
+                shadowRoot.appendChild(template.cloneNode(true));
+            } else {
+                shadowRoot.innerHTML = this.#template;
+            }
 
-            shadowRoot.appendChild(this.template.cloneNode(true));
+            let mediaInfos = heWrapper.generate('ul');
 
             //TODO: Improve with bindings...
             this.#mediaItemsObserver.Observe((t, a) => {
-                if (a === 'push') this.mediaFileSelector.innerText = t.info.blobName;
+                if (a === 'push') {
+                    this.mediaFileSelector.innerText = t.info.blobName;
+
+                    mediaInfos.createChild('li', `Name: ${t.info.blobName}`);
+                    mediaInfos.createChild('li', `Size: ${t.info.blobSize}`);
+                    mediaInfos.createChild('li', `Last Modified On: ${t.info.lastModifiedOn}`);
+                    mediaInfos.createChild('li', `Mime Type: ${t.info.mimeType}`);
+                }
             });
 
             this.#addPlayerEventHandlers();
@@ -68,6 +88,8 @@ customElements.define('transcript-media-player',
                         this.#mediaItems.push(MediaItem.createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider));
                     });
                 });
+            
+            shadowRoot.getElementById('mediaInfoContainer')?.appendChild(mediaInfos.element);
         }
 
         disconnectedCallback() {
@@ -114,4 +136,6 @@ customElements.define('transcript-media-player',
             });
         }
     }
-);
+    
+    customElements.define('transcript-media-player', TranscriptMediaPlayer);
+}

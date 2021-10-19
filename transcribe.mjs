@@ -114,38 +114,6 @@ function _displayError(message) {
     dispatchDisplayErrorMessage(message);
 }
 
-// function handleMediaFileSelect(evt) {
-//     var files = evt.target.files;
-
-//     for (var i = 0, f; f = files[i]; i++) {
-
-//         // Only process audio files.
-//         if (!f.type.match('audio.*')) {
-//             alert('Must be an audio file');
-//             return;
-//         };
-
-//         // Warn user if file size is larger than 50mb
-//         let fileSize = Math.round(f.size / 1000000)
-//         if (fileSize > 50.457280) {
-//             _displayError(`This media file is ${fileSize} mb. There may be playback issues above 50mb. For ways to reduce file size see the docs: https://`);
-//         }
-
-//         var reader = new FileReader();
-
-//         // Closure to capture the file information.
-//         reader.onload = (function (theFile) {
-//             return function (e) {
-//                 console.log(`loading media: ${theFile.name}`);
-//                 $id('mediaPlayer').src = e.target.result;
-//                 $id('mediaFileName').innerHTML = theFile.name;
-//             };
-//         })(f);
-
-//         reader.readAsDataURL(f);
-//     }
-// }
-
 function handleJsonFileSelect(evt) {
     const files = evt.target.files;
     for (let i = 0, f; f = files[i]; i++) {
