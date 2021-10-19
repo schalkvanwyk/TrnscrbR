@@ -1,9 +1,8 @@
-
-// import html from './media_player.js'
+//TODO: remove not working
+// import html from './media_player.html'
 import {
     $,
     $Id,
-    Binding,
     ArrayObserver,
     HtmlElementWrapper as heWrapper
 } from './../../utils/utils.mjs'
@@ -15,14 +14,17 @@ import {
 //https://stackoverflow.com/a/55081177/26700
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/
 //https://www.webcomponents.org/community/articles/introduction-to-html-imports
-fetch('./js/core/media/media_player.html')
-    .then(stream => stream.text())
-    .then(text => define(text));
 
-function define(template) {
+export var transcriptMediaPlayerLoader = (elementName) => {
+    fetch('./js/core/media/media_player.html')
+        .then(stream => stream.text())
+        .then(text => define(text));
+}
+
+function define(template, elementName) {
     class TranscriptMediaPlayer extends HTMLElement {
-        static elementName = 'transcript-media-player';
-        static templateName = 'transcript-media-player-template';
+        static #elementName = 'transcript-media-player';
+        static #templateName = 'transcript-media-player-template';
         #template = {};
         #fileProvider = new MediaFileBlobProvider().loadBlobTo;
         #metaDataProvider = () => ({});
@@ -36,25 +38,9 @@ function define(template) {
             this.#template = template;
         }
 
-        static get templateName() { return TranscriptMediaPlayer.templateName; }
-
-        get mediaFileSelector() {
-            Object.defineProperty(this, "mediaFileSelector", { value: $Id('mediaFileName', this.shadowRoot), writable: false });
-            return this.mediaFileSelector;
-        }
-
-        get mediaPlayer() {
-            Object.defineProperty(this, "mediaPlayer", { value: this.shadowRoot.getElementById('mediaPlayer'), writable: false });
-            return this.mediaPlayer;
-        }
-
-        get currentTime() { return this.mediaPlayer.currentTime; }
-
-        seek(currenttime) {
-            this.mediaPlayer.currentTime = currenttime;
-        }
-
         connectedCallback() {
+            if(!this.#template) return;
+
             this.render();
 
             //TODO: Improve with bindings...
@@ -88,8 +74,29 @@ function define(template) {
                 });
         }
 
-        disconnectedCallback() {
-            // removeDisplayErrorMessageListener(this._display.bind(this));
+        // disconnectedCallback() {
+        //     // removeDisplayErrorMessageListener(this._display.bind(this));
+        // }
+
+        static get elementName() { return TranscriptMediaPlayer.#elementName; }
+        static get templateName() { return TranscriptMediaPlayer.#templateName; }
+
+        get mediaItems() { return this.#mediaItems; }
+
+        get mediaFileSelector() {
+            Object.defineProperty(this, "mediaFileSelector", { value: $Id('mediaFileName', this.shadowRoot), writable: false });
+            return this.mediaFileSelector;
+        }
+
+        get mediaPlayer() {
+            Object.defineProperty(this, "mediaPlayer", { value: this.shadowRoot.getElementById('mediaPlayer'), writable: false });
+            return this.mediaPlayer;
+        }
+
+        get currentTime() { return this.mediaPlayer.currentTime; }
+
+        seek(currenttime) {
+            this.mediaPlayer.currentTime = currenttime;
         }
 
         render() {
@@ -102,7 +109,7 @@ function define(template) {
             if (template) {
                 this.shadowRoot.appendChild(template.cloneNode(true));
             } else {
-                this.shadowRoot.innerHTML = this.#template.trim();
+                this.shadowRoot.innerHTML = this.#template?.trim();
             }
 
             let mediaInfos = heWrapper.generate('ul');
@@ -197,6 +204,6 @@ function define(template) {
         //     return { cssContent : template.querySelector('head>style'), htmlContent: template.querySelector('body') };
         // }
     }
-    
-    customElements.define(TranscriptMediaPlayer.elementName, TranscriptMediaPlayer);
+
+    customElements.define(elementName ?? TranscriptMediaPlayer.elementName, TranscriptMediaPlayer);
 }

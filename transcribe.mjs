@@ -11,6 +11,11 @@ import {
 import {
     dispatchDisplayErrorMessage
 } from './js/components/events.mjs'
+import {
+    transcriptMediaPlayerLoader
+} from './js/core/core.mjs'
+
+transcriptMediaPlayerLoader();
 
 listenFor('click', '#clearTranscripts', handleClearTranscripts);
 listenFor('change', '#transcriptFileSource', handleJsonFileSelect);
