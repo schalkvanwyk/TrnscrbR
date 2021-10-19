@@ -7,10 +7,14 @@ export class MediaItem {
         this.#metaDataProvider = metaDataProvider;
     }
 
-    static createUsing(source, targetPlayerLoader, mediaProvider, metaDataProvider) {
+    static async createUsing(
+        source, 
+        targetPlayerLoader = s => {}, 
+        mediaProvider = MediaFileBlobProvider.loadBlobTo, 
+        metaDataProvider = async () => {}) {
         if(!source) throw new Error('Argument Required! The argument "source" is required.');
 
-        return new MediaItem(mediaProvider, metaDataProvider)
+        return await new MediaItem(mediaProvider, metaDataProvider)
             .#loadMedia(source, targetPlayerLoader)
             .#loadMetaData();
     }
@@ -24,9 +28,12 @@ export class MediaItem {
         this.info = this.#mediaProvider(source, target);
         return this;
     }
-    #loadMetaData() {
-        let data = this.#metaDataProvider();
-        this.metaData = MediaMetaData.createFrom(data);
+    async #loadMetaData() {
+        let data = await this.#metaDataProvider();
+        this.mediaMetaData = MediaMetaData.createFrom(data);
+        this.metaData = this.mediaMetaData.metaData;
+        this.participants = this.mediaMetaData.participants;
+        this.tags = this.mediaMetaData.tags;
         this.#readMediaInfo(this.metaData);
         return this;
     }
@@ -50,15 +57,25 @@ class MediaInfo {
         let result = existing || source;
         if(result !== source) {
             //TODO: Merge source and existing
-            result = result;//.Merge(source);
+            result = result.merge(source);
         }
         return result;
+    }
+
+    merge(other) {
+        this.id = other.id;
+        this.effectiveFrom = other.effectiveFrom;
+        this.createdOn = other.createdOn;
+        this.createdBy = other.createdBy;
+        this.sourceUri = other.sourceUri;
+
+        return this;
     }
 }
 
 class MediaMetaData {
     constructor(existing){
-        this.data = existing || [];
+        this.data = existing || {};
     }
 
     static createFrom(existing)
@@ -66,11 +83,37 @@ class MediaMetaData {
         return new MediaMetaData(existing);
     }
 
+    get metaData() { return this.data.metaData; }
+
+    get participants() { return this.data.participants; }
+
+    get tags() { return this.data.tags; }
+
     add(name, value) {
 
     }
     remove(name) {
 
+    }
+}
+
+export class MediaMetaDataRestAPI {
+    #baseUri;
+
+    constructor(baseUri) {
+        //TODO: validate URI...
+        this.#baseUri = baseUri;
+    }
+
+    async getById(id) {
+        let uri = this.#buildUri(`medias/${id}`);
+
+        return await fetch(uri)
+            .then(response => response.json());
+    }
+
+    #buildUri(resourcePath) {
+        return `${this.#baseUri}/${resourcePath}`;
     }
 }
 
