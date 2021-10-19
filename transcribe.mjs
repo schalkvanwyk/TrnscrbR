@@ -41,47 +41,43 @@ speakersObserver.Observe(function(result, method){
     switch (method) {
         case 'set':
             let speaker = speakers.get(result);
-            let speakersListItem = speakersList.querySelector(`#speaker_${result}`);
+            let speakersListItem = $(`#speaker_${result}`, speakersList);
             let speakerIndex = Array.from(speakers.keys()).indexOf(speaker.speakerName)+1;
 
             if(!speakersListItem) {
                 let dfContainer = document.createDocumentFragment();
 
-                let speakerElementLabel = dfContainer.appendChild(document.createElement('label'));
-                speakerElementLabel.htmlFor = result;
-                speakerElementLabel.innerText = 'Speaker Name';
-                speakerElementLabel.classList.add('hidden');
-                speakerElementLabel.classList.add('simptip-info');
-                speakerElementLabel.classList.add('simptip-position-top');
-                speakerElementLabel.dataset.tooltip = 'Update speaker name';
-                
-                let speakerElement = dfContainer.appendChild(document.createElement('input'));
-                speakerElement.id = 'speaker_' + result;
-                speakerElement.type = 'text'
-                speakerElement.classList.add(`speaker-${speakerIndex}`)
-                speakerElement.value = speaker.speakerName;
-                // speakerElement.onclick = handleSpeakerSelected;
-                speakerElement.onchange = e => speaker.speakerName = e.target.value;
+                let speakerElement = heWrapper
+                    .generate('span', speaker.speakerName)
+                    .addClass(`speaker-${speakerIndex}`)
+                    .element;
+                speakerElement.id = `speaker_${result}`;
+                speakerElement.contentEditable = true;
+                speakerElement.oninput = e => speaker.speakerName = e.target.innerText;
+
+                dfContainer.appendChild(speakerElement);
                 
                 speaker.speakerObserver.Observe(newValue => {
-                    let speakerSectionLabels = document.querySelectorAll(`dfn[data-speaker=${result}]`);
+                    let speakerSectionLabels = $$(`dfn[data-speaker=${result}]`);
                     speakerSectionLabels.forEach(element => {
                         element.innerText = newValue;
                     });
                 });
 
-                let speakerSegmentsList = dfContainer.appendChild(document.createElement('details')).appendChild(document.createElement('ol'));
+                let speakerSegmentsList = heWrapper
+                    .generate('details', null, true, dfContainer)
+                    .createChildAndUse('ol');
                 speaker.segments.forEach(segment => {
-                    speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`;
+                    speakerSegmentsList.createChild('li', `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`);
                 });
 
-                speakersListItem = document.createElement('li');
-                speakersListItem.classList.add(`speaker-${speakerIndex}`);
-                speakersListItem.appendChild(dfContainer);
-                
-                speakersList.appendChild(speakersListItem);
+                speakersListItem = heWrapper
+                    .generate('li', null, true, speakersList)
+                    .addClass(`speaker-${speakerIndex}`)
+                    .element
+                    .appendChild(dfContainer);
             } else {
-                let speakerSegmentsList = speakersListItem.parentNode.querySelector('ol');
+                let speakerSegmentsList = $('ol', speakersListItem.parentNode);
                 // let speakerItems = speaker.segments.reduce((p, c) => {
                 //     if(p) {
                 //         p.end_time = c.end_time;
@@ -89,7 +85,7 @@ speakersObserver.Observe(function(result, method){
                 //     }
                 // });
                 let segment = speaker.segments[speaker.segments.length-1];
-                speakerSegmentsList.appendChild(document.createElement('li')).innerText = `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`;
+                speakerSegmentsList.appendChild(heWrapper.generate('li', `${TimeConversion.secondsToTime(segment.start_time)}-${TimeConversion.secondsToTime(segment.end_time)}`).element);
             }
             break;
         case 'clear':

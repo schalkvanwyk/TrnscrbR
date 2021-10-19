@@ -43,7 +43,11 @@ export class HtmlElementWrapper {
         return wrapper;
     }
     
-    static generate(element, text, display = true) {
-        return new HtmlElementWrapper(element, text, display);
+    static generate(element, text, display = true, parentNode) {
+        let result = new HtmlElementWrapper(element, text, display);
+
+        if(parentNode) parentNode.appendChild(result.element);
+        
+        return result;
     }
 }

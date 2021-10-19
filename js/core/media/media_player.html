@@ -6,7 +6,7 @@
         overflow-wrap: anywhere;
     }
     figure {
-        grid-row: 1 / 4;
+        grid-row: 1 / 5;
         padding: 0px;
         margin: 0px;
     }
@@ -18,7 +18,7 @@
             <p>Select the media file</p>
             <div id="mediaFileName" class="file-name">No File</div>
         </label>
-        <input id="mediaFileSource" class="file-input hidden" type="file" name="mediaFileSource" />
+        <input id="mediaFileSource" type="file" name="mediaFileSource" accept="audio/*, video/*" class="file-input visually-hidden" />
     </figcaption>
     <!-- https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/Video_player_styling_basics -->
     <video id="mediaPlayer" height="150px" preload="metadata" controls>
@@ -53,7 +53,15 @@
     <summary>Participants<span style="float: left; padding-right: 5px;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see Participants">?</span></summary>
     <hr />
     <div id="mediaParticipantsContainer">
-        <ul>
-        </ul>
+        <ol contenteditable>
+        </ol>
+    </div>
+</details>
+<details>
+    <summary>Tags<span style="float: left; padding-right: 5px;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see media tags">?</span></summary>
+    <hr />
+    <div id="mediaTagsContainer">
+        <ol contenteditable>
+        </ol>
     </div>
 </details>

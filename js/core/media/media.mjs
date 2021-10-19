@@ -15,8 +15,9 @@ export class MediaItem {
             .#loadMetaData();
     }
 
-    info;
-    metaData;
+    info = {};
+    metaData = {};
+    tags = [];
 
     #loadMedia(source, target) {
         this.info = this.#mediaProvider(source, target);
