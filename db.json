@@ -1,7 +1,54 @@
 {
     "medias" : [
         {
-            "id": 1
+            "id": 1,
+            "effectiveFrom": "2021-10-19T13:25:00Z",
+            "createdOn": "2021-10-19T13:40:20Z",
+            "createdBy": "Joe Soap (ext 104)",
+            "sourceUri": "https://some.place/safe/Joe_Soap_104-+001234567890_20211019134020.wav",
+            "metaData": {
+                "mediaType": "audio/wav",
+                "direction": "outgoing",
+                "caller": "Joe_Soap_104",
+                "callee": "+001234567890",
+                "complianceType": "Telephone Conversation",
+                "recordingStartedOn": "2021-10-19T13:25:00Z",
+                "recordingEndedOn": "2021-10-19T13:40:20Z",
+                "duration": "15:20",
+                "subject": "Client Satisfaction Conversation"
+            },
+            "participants": [
+                "Joe Soap",
+                "Griet Pompies"
+            ],
+            "tags": [
+                "Sensitive",
+                "ClientCall"
+            ]
+        },
+        {
+            "id": 2,
+            "effectiveFrom": "2021-10-19T11:25:00Z",
+            "createdOn": "2021-10-19T13:40:20Z",
+            "createdBy": "Joe Soap (ext 104)",
+            "metaData": {
+                "mediaType": "audio/wav",
+                "complianceType": "Remote Meeting",
+                "recordingStartedOn": "2021-10-19T11:25:00Z",
+                "recordingEndedOn": "2021-10-19T12:25:01Z",
+                "duration": "01:01",
+                "subject": "Another Zoom meeting"
+            },
+            "participants": [
+                "Joe Soap",
+                "Jane Soap",
+                "Piet Pompies",
+                "Griet Pompies"
+            ],
+            "tags": [
+                "Confidential",
+                "Meeting"
+            ]
         }
     ],
     "transcripts" : [
