@@ -5,6 +5,7 @@
         overflow-wrap: anywhere;
     }
     figure {
+        grid-row: 1 / 4;
         padding: 0px;
         margin: 0px;
     }
@@ -39,10 +40,18 @@
         &copy; | <a href="#"></a>
     </figcaption>
 </figure>
-<details class="info aside" open>
+<details open>
     <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the media file">Media Information</summary>
     <hr />
-    <div id="mediaInfoContainer" class="info">
+    <div id="mediaInfoContainer">
+        <ul>
+        </ul>
+    </div>
+</details>
+<details>
+    <summary class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see Participants">Participants</summary>
+    <hr />
+    <div id="mediaParticipantsContainer">
         <ul>
         </ul>
     </div>
