@@ -2,6 +2,7 @@ class MediaProvider {
     loadBlobTo(source, target){}
 }
 
+//TODO: To load blob look at https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await#rewriting_promise_code_with_asyncawait
 export class MediaFileBlobProvider extends MediaProvider {
     loadBlobTo(source, targetLoader, mediaInfoBuilder) {
         // Warn user if file size is larger than 50mb

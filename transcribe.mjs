@@ -12,23 +12,14 @@ import {
     dispatchDisplayErrorMessage
 } from './js/components/events.mjs'
 import {
+    theApp,
     mpLoaderSettings,
     MediaItemBuilder,
-    MediaMetaDataRestClient,
     MediaFileBlobProvider,
     transcriptMediaPlayerLoader
-} from './js/core/core.mjs'
+} from './js/app.mjs'
 
-const devHosts = [
-    'localhost',
-    '127.0.0.1'
-];
-
-let mediaMetadataRestAPIUri = 'http://localhost:3000';
-if(!devHosts.includes(window.location.hostname)) {
-    mediaMetadataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
-}
-const mediaMetaDataRestClient = new MediaMetaDataRestClient(mediaMetadataRestAPIUri);
+const mediaMetaDataRestClient = theApp.mediaMetaDataRestClient;
 
 mpLoaderSettings.mediaItemBuilder = MediaItemBuilder.createUsing;
 mpLoaderSettings.mediaBlobProvider = new MediaFileBlobProvider().loadBlobTo;

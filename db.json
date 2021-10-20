@@ -1,26 +1,19 @@
 {
-    "medias" : [
+    "medias": [
         {
             "id": 1,
+            "key": "Joe_Soap_104-+001234567890_20211019134020",
             "effectiveFrom": "2021-10-19T13:25:00Z",
             "createdOn": "2021-10-19T13:40:20Z",
             "createdBy": "Joe Soap (ext 104)",
             "modifiedOn": "2021-10-19T13:40:20Z",
             "modifiedBy": "Joe Soap (ext 104)",
-            "transcript": {
-                "id": 1,
-                "effectiveFrom": "2021-10-19T13:25:00Z",
-                "createdOn": "2021-10-19T13:40:20Z",
-                "createdBy": "Joe Soap (ext 104)",
-                "name": "Jane_Soap_105-+001234567890_20211020132500.json",
-                "format": "AWS"
-            },
             "blob": {
                 "name": "Joe_Soap_104-+001234567890_20211019134020.wav",
                 "size": "4464686",
                 "lastModifiedOn": "2021-10-19T13:25:00Z",
                 "mimeType": "audio/wav",
-                "sourceUri": "https://some.place/safe/Joe_Soap_104-+001234567890_20211019134020.wav"
+                "sourceUri": "https://some.place/safe/media/Joe_Soap_104-+001234567890_20211019134020.wav"
             },
             "metadata": {
                 "mediaType": "audio",
@@ -40,6 +33,17 @@
             "tags": [
                 "Sensitive",
                 "ClientCall"
+            ],
+            "transcripts": [
+                {
+                    "id": 1,
+                    "key": "Joe_Soap_104-+001234567890_20211019134020",
+                    "effectiveFrom": "2021-10-19T13:25:00Z",
+                    "createdOn": "2021-10-19T13:40:20Z",
+                    "createdBy": "Joe Soap (ext 104)",
+                    "name": "Joe_Soap_104-+001234567890_20211019134020.json",
+                    "format": "AWS"
+                }
             ]
         },
         {
@@ -67,7 +71,8 @@
             ]
         },
         {
-            "id": 1,
+            "id": 3,
+            "key": "Jane_Soap_105-+001234567890_20211020132500",
             "effectiveFrom": "2021-10-20T13:25:00Z",
             "createdOn": "2021-10-20T13:40:20Z",
             "createdBy": "Jane Soap (ext 105)",
@@ -78,13 +83,24 @@
                 "size": "4464686",
                 "lastModifiedOn": "2021-10-20T13:25:00Z",
                 "mimeType": "audio/wav",
-                "sourceUri": "https://some.place/safe/Jane_Soap_105-+001234567890_20211020132500.wav"
+                "sourceUri": "https://some.place/safe/media/Jane_Soap_105-+001234567890_20211020132500.wav"
             }
         }
     ],
-    "transcripts" : [
+    "transcripts": [
         {
-            "id": 1
+            "id": 1,
+            "key": "Joe_Soap_104-+001234567890_20211019134020",
+            "effectiveFrom": "2021-10-19T13:25:00Z",
+            "createdOn": "2021-10-19T13:40:20Z",
+            "createdBy": "Joe Soap (ext 104)",
+            "name": "Joe_Soap_104-+001234567890_20211019134020.json",
+            "format": "AWS",
+            "sourceUri": "https://some.place/safe/transcript/Joe_Soap_104-+001234567890_20211019134020.json",
+            "media": {
+                "id": 1,
+                "key": "Joe_Soap_104-+001234567890_20211019134020"
+            }
         }
     ]
 }

@@ -147,10 +147,20 @@
 </script>
 -->
 
-    <main class="page">
+    <main id="app" class="page">
     </main>
 
-    <script type="module" src="./js/app.mjs"></script>
+    <!-- <script type="module" src="./js/trnscrbrapp.mjs"></script> -->
+    <script type="module">
+        import {
+            theApp
+        } from './js/app.mjs'
+
+        let router = () => theApp.router.applyTo(window.location);
+        
+        window.addEventListener('hashchange', router);
+        window.addEventListener('load', router);
+    </script>
 </body>
 
 <footer>

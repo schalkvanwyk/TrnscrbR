@@ -14,6 +14,31 @@
     </script>
     
     <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <style>
+        ul.list {
+            border: solid; 
+            border-left: 0; 
+            border-width: thin; 
+            padding: 0px;
+        }
+
+        .list li {
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: minmax(25px, auto);
+        }
+
+        .list li > div {
+            border-left: solid; 
+            border-width: thin;
+        }
+
+        .list li > div.td {
+            border-top: solid;
+            border-width: thin;
+        }
+    </style>
+
     <script type="text/javascript" src="js/components/list.js"></script>
 </head>
 
@@ -25,30 +50,57 @@
     <main id="page_content" aria-label="Media Browsing">
         <section id="mediaListingContainer">
             <ul class="list">
-                <li style="display: grid; grid-template-columns: 1fr 1fr;"><div>id</div><div>name</div></li>
+                <li style="background-color: aliceblue;">
+                    <div>Key</div>
+                    <div>Name</div>
+                    <div>Created On</div>
+                </li>
             </ul>
         </section>
 
         <div style="display:none;">
-            <li id="mediaListingItem" style="display: grid;grid-template-columns: 1fr 1fr;"><div class="id"></div><div class="name"></div></li>
+            <li id="mediaListingItem">
+                <div class="td"><a class="link key"></a></div>
+                <div class="td blob_name"></div>
+                <div class="td createdOn"></div>
+                <div class="td visually-hidden">Details</div>
+            </li>
         </div>
     </main>
 
-    <script type="text/javascript">
-        ( function(window, undefined) {
-            "use strict";
-            const options = {
-                valueNames: [ 'id', 'name' ],
-                item: 'mediaListingItem'
-            };
+    <script type="module">
+        import {
+            theApp
+        } from './js/app.mjs'
 
-            const values = [
-                { id: '1', name: 'bob' },
-                { id: '2', name: 'bob2' }
-            ]
+        const NaN = '[-Unknown-]';
 
-            const mediaList = new List('mediaListingContainer', options, values);
-        })(window);
+        let values = await theApp
+                .mediaMetaDataRestClient
+                .listAll()
+                .then(result => result
+                    .map(o => {
+                        return {
+                            id: o.id ?? null,
+                            key: o.key ?? NaN,
+                            createdOn: o.createdOn ?? null,
+                            blob_name: o.blob?.name ?? null,
+                            link: o.id ? `#/media/${o.id}` : null
+                        };
+                    }));
+
+        const options = {
+            valueNames: [ 
+                'key', 
+                'blob_name', 
+                'createdOn', 
+                { data: ['id'] },
+                { attr: 'href', name: 'link' },
+            ],
+            item: 'mediaListingItem'
+        };
+
+        const mediaList = new List('mediaListingContainer', options, values);
     </script>
 </body>
 <footer>
