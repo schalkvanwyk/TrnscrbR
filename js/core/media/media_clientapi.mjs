@@ -23,7 +23,6 @@ class MediaItem {
         this.#metadataProvider = metadataProvider;
     }
 
-
     mediaMetadata = {};
     info = {};
     get metadata() { return this.mediaMetadata?.metadata ?? {}; };
@@ -80,8 +79,10 @@ class MediaInfo {
 }
 
 class MediaMetaData {
+    #data = {};
+
     constructor(existing){
-        this.data = existing || {};
+        this.#data = existing || {};
     }
 
     static createFrom(existing)
@@ -89,16 +90,18 @@ class MediaMetaData {
         return new MediaMetaData(existing);
     }
 
-    get metadata() { return this.data.metadata; }
+    get data() { return this.#data; }
 
-    get participants() { return this.data.participants; }
+    get metadata() { return this.#data.metadata; }
 
-    get tags() { return this.data.tags; }
+    get participants() { return this.#data.participants; }
+
+    get tags() { return this.#data.tags; }
 
     add(name, value) {
-
+        Object.defineProperty(this.metadata, name, { value: value });
     }
     remove(name) {
-
+        delete this.metadata[name];
     }
 }

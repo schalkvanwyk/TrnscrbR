@@ -7,13 +7,20 @@ export class MediaMetaDataRestClient {
     }
 
     async getById(id) {
-        let uri = this.#buildUri(`medias/${id}`);
+        let uri = this.#buildUri(id);
+
+        return await fetch(uri)
+            .then(response => response.json());
+    }
+
+    async listAll() {
+        let uri = this.#buildUri();
 
         return await fetch(uri)
             .then(response => response.json());
     }
 
     #buildUri(resourcePath) {
-        return `${this.#baseUri}/${resourcePath}`;
+        return `${this.#baseUri}/medias/${resourcePath}`;
     }
 }

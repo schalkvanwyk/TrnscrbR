@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="AWS Transcription Viewer" />
+
+    <title>Trnscrbr - Media Listing</title>
+
+    <script type="text/javascript">
+      // remove no-js and add 'js' to the HTML
+      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    </script>
+    
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script type="text/javascript" src="js/components/list.js"></script>
+</head>
+
+<header>
+    <h2>Media Listing</h2>
+</header>
+
+<body id="body">
+    <main id="page_content" aria-label="Media Browsing">
+        <section id="mediaListingContainer">
+            <ul class="list">
+                <li style="display: grid; grid-template-columns: 1fr 1fr;"><div>id</div><div>name</div></li>
+            </ul>
+        </section>
+
+        <div style="display:none;">
+            <li id="mediaListingItem" style="display: grid;grid-template-columns: 1fr 1fr;"><div class="id"></div><div class="name"></div></li>
+        </div>
+    </main>
+
+    <script type="text/javascript">
+        ( function(window, undefined) {
+            "use strict";
+            const options = {
+                valueNames: [ 'id', 'name' ],
+                item: 'mediaListingItem'
+            };
+
+            const values = [
+                { id: '1', name: 'bob' },
+                { id: '2', name: 'bob2' }
+            ]
+
+            const mediaList = new List('mediaListingContainer', options, values);
+        })(window);
+    </script>
+</body>
+<footer>
+</footer>
+
+</html>

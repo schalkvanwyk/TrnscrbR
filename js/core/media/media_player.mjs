@@ -75,9 +75,6 @@ function define(template, settings) {
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
                 });
             });
-
-            //TODO: Improve with bindings...
-            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
             
             $Id('mediaParticipantsContainer', this.shadowRoot).addEventListener('input', this.#mediaParticipantsChanged);
             this.#mediaParticipantsContainerObserver.observe(
@@ -143,23 +140,14 @@ function define(template, settings) {
                 infoContainer.innerHTML = '';
 
                 this.#bindListItem(info, 'blobName', 'Name: ', infoContainer);
-                // heWrapper.generate('li', `Name: ${info.blobName ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'blobSize', 'Size: ', infoContainer);
-                // heWrapper.generate('li', `Size: ${info.blobSize ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'lastModifiedOn', 'Last Modified On: ', infoContainer);
-                // heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, infoContainer);
                 this.#bindListItem(info, 'mimeType', 'Mime Type: ', infoContainer);
-                // heWrapper.generate('li', `Mime Type: ${info.mimeType ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'effectiveFrom', 'Effective From: ', infoContainer);
-                // heWrapper.generate('li', `Effective From: ${info.effectiveFrom ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'createdOn', 'Created On: ', infoContainer);
-                // heWrapper.generate('li', `Created On: ${info.createdOn ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'createdBy', 'Created By: ', infoContainer);
-                // heWrapper.generate('li', `Created By: ${info.createdBy ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'sourceUri', 'Source Uri: ', infoContainer);
-                // heWrapper.generate('li', `Source Uri: ${info.sourceUri ?? ''}`, true, infoContainer);
                 this.#bindListItem(info, 'id', 'Metadata Id: ', infoContainer);
-                // heWrapper.generate('li', `Metadata Id: ${info.id ?? ''}`, true, infoContainer);
 
                 let participantsContainer = $('#mediaParticipantsContainer>ol', $this.shadowRoot);
                 target.participants.forEach(participant => {
@@ -168,7 +156,7 @@ function define(template, settings) {
 
                 let metadataContainer = $('#mediaMetadataContainer>ul', $this.shadowRoot);
                 let metadata = target.metadata;
-                Object.entries(metadata).map(([k, v]) => {
+                Object.entries(metadata).forEach(([k, v]) => {
                     this.#bindListItem(metadata, k, `${k}: `, metadataContainer);
                 });
 
@@ -189,11 +177,12 @@ function define(template, settings) {
                 
                 boundItem.dataset.binding = propertyName;
                 
+                //TODO:Is this working...? remove?
                 let binding = new Binding({object: target, property: propertyName});
                 binding.addBinding(boundItem, 'innerHtml');
 
-                if(!target.bindings) target.bindings = [];
-                target.bindings.push(binding);
+                if(!target._bindings) Object.defineProperty(target, '_bindings', { value: [], enumerable: false });
+                target._bindings.push(binding);
             }
         }
 

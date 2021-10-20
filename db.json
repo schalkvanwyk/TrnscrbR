@@ -5,9 +5,25 @@
             "effectiveFrom": "2021-10-19T13:25:00Z",
             "createdOn": "2021-10-19T13:40:20Z",
             "createdBy": "Joe Soap (ext 104)",
-            "sourceUri": "https://some.place/safe/Joe_Soap_104-+001234567890_20211019134020.wav",
+            "modifiedOn": "2021-10-19T13:40:20Z",
+            "modifiedBy": "Joe Soap (ext 104)",
+            "transcript": {
+                "id": 1,
+                "effectiveFrom": "2021-10-19T13:25:00Z",
+                "createdOn": "2021-10-19T13:40:20Z",
+                "createdBy": "Joe Soap (ext 104)",
+                "name": "Jane_Soap_105-+001234567890_20211020132500.json",
+                "format": "AWS"
+            },
+            "blob": {
+                "name": "Joe_Soap_104-+001234567890_20211019134020.wav",
+                "size": "4464686",
+                "lastModifiedOn": "2021-10-19T13:25:00Z",
+                "mimeType": "audio/wav",
+                "sourceUri": "https://some.place/safe/Joe_Soap_104-+001234567890_20211019134020.wav"
+            },
             "metadata": {
-                "mediaType": "audio/wav",
+                "mediaType": "audio",
                 "direction": "outgoing",
                 "caller": "Joe_Soap_104",
                 "callee": "+001234567890",
@@ -32,7 +48,7 @@
             "createdOn": "2021-10-19T13:40:20Z",
             "createdBy": "Joe Soap (ext 104)",
             "metaData": {
-                "mediaType": "audio/wav",
+                "mediaType": "audio",
                 "complianceType": "Remote Meeting",
                 "recordingStartedOn": "2021-10-19T11:25:00Z",
                 "recordingEndedOn": "2021-10-19T12:25:01Z",
@@ -49,6 +65,21 @@
                 "Confidential",
                 "Meeting"
             ]
+        },
+        {
+            "id": 1,
+            "effectiveFrom": "2021-10-20T13:25:00Z",
+            "createdOn": "2021-10-20T13:40:20Z",
+            "createdBy": "Jane Soap (ext 105)",
+            "modifiedOn": "2021-10-20T14:40:20Z",
+            "modifiedBy": "Jane Soap (ext 105)",
+            "blob": {
+                "name": "Jane_Soap_105-+001234567890_20211020132500.wav",
+                "size": "4464686",
+                "lastModifiedOn": "2021-10-20T13:25:00Z",
+                "mimeType": "audio/wav",
+                "sourceUri": "https://some.place/safe/Jane_Soap_105-+001234567890_20211020132500.wav"
+            }
         }
     ],
     "transcripts" : [

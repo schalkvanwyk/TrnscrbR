@@ -18,7 +18,7 @@
     <!-- Tells Google not to provide a translation for this document -->
     <meta name="google" content="notranslate">
 
-    <script>
+    <script type="text/javascript">
       // remove no-js and add 'js' to the HTML
       document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
     </script>
@@ -210,9 +210,9 @@
         }
     </style>
 
-    <script src="js/plugins.js" defer></script>
-    <script src="js/components/aria.disclosure.js" defer></script>
-    <!-- <script src="js/components/video-player.js"></script> -->
+    <script type="text/javascript" src="js/plugins.js" defer></script>
+    <script type="text/javascript" src="js/components/aria.disclosure.js" defer></script>
+    <!-- <script type="text/javascript" src="js/components/video-player.js"></script> -->
     <script type="module" src="js/components/errormsngr.mjs"></script>
     <script type="module" src="js/core/media/media_player.mjs"></script>
 </head>
@@ -220,114 +220,8 @@
 <header>
     <h1><abbr>Trnscrbr</abbr> - A Transcription Viewer</h1>
 </header>
+
 <body id="body">
-    <!-- <div id="page" class="page">
-        <div data-disclosure="A generated button">
-            <p data-disclosure-content>
-                This content will turn into a disclosure
-                once the script runs.
-            </p>
-        </div>
-
-        <div id="ex" data-disclosure data-disclosure-type="block">
-            <span data-disclosure-btn>
-            A full width "button"
-            </span>
-            <div data-disclosure-content>
-            <p>
-                Allows for a large hit area for the disclosure widget's
-                trigger.
-            </p>
-            <p>
-                <a href="#!">
-                This link is here just for focus testing.
-                </a>
-            </p>
-            </div>
-        </div>
-
-        <div id="ex2" data-disclosure data-disclosure-type="block" data-disclosure-open data-disclosure-class="test-class">
-            <h4>
-            <button data-disclosure-btn>
-                Disclosure button within a heading
-            </button>
-            </h4>
-            <div data-disclosure-content>
-            <p>
-                This disclosure widget is opened by default. Because that's a thing that should be able to happen.
-            </p>
-
-            <p>
-                Here's an example of a nested flyout disclosure widget:
-
-                <span data-disclosure="I'm a flyout!" data-disclosure-type="flyout">
-                <span data-disclosure-content>
-                    This example has a <a href="#">link within it</a>. Flyouts can
-                    be closed via the <kbd>ESC</kbd> key, as long as focus is on the <code>button</code> or within the revealed content.
-                    <br>
-                    Flyouts will auto-close if focus leaves the flyout.
-                </span>
-                </span>
-
-                All of this is contained within a single paragraph.
-            </p>
-
-            <p>
-                Here's an example of yet another flyout disclosure widget because testing:
-
-                <span data-disclosure="I'm another flyout!" data-disclosure-hover data-disclosure-type="flyout">
-                <span data-disclosure-content>
-                    This one doesn't have a link in it.
-                </span>
-                </span>
-
-                All of this is contained within a single paragraph.
-            </p>
-            </div>
-        </div>
-
-        <section>
-            <p>
-                This example showcases how a disclosure widget can be used to create
-                an off-site navigation. Using the <code>data-disclosure-manual-classes</code> to
-                not add any of the default classes to the widget, and to instead use totally custom
-                classes for the component.
-            </p>
-
-            <nav aria-label="example" id="my_nav" data-disclosure-type="flyout" data-disclosure data-disclosure-manual-classes>
-                <button data-disclosure-btn hidden>Menu</button>
-
-                <div data-disclosure-content>
-                    <ul>
-                        <li><a href="#">Link 1</a></li>
-                        <li><a href="#">Link 2</a></li>
-                        <li><a href="#">Link 3</a></li>
-                    </ul>
-                </div>
-            </nav>
-
-            <p>
-                <a href="#">Focusable element after the navigation</a>.
-            </p>
-        </section>
-    </div> -->
-
-<!--
-<input id="testBindingInput" />
-<div id="testBinding"></div>
-<script>
-    var tbiData = {
-        myInput: "test"
-    };
-    new Binding({
-        object: tbiData,
-        property: "myInput"
-    })
-    .addBinding(document.getElementById("testBindingInput"), "value", "keyup")
-    .addBinding(document.getElementById("testBinding"), "innerHTML");
-</script>
--->
-
     <main class="page" aria-label="Transcript Workspace">
         <section id="mediaSection" class="mediaPlayer">
             <h1>Media</h1>
@@ -390,41 +284,5 @@
 
     <script type="module" src="transcribe.mjs"></script>
 </body>
-
-<!-- Disclosure demo https://github.com/scottaohara/aria_disclosure_widget -->
-<!-- <script type="text/javascript">
-    var disclosure = '[data-disclosure]';
-    var els = document.querySelectorAll(disclosure);
-
-    // Generate all tab instances
-    for ( var i = 0; i < els.length; i++ ) {
-      var dis = new A11Ydisclosure( els[i] );
-    }
-
-    // navigation example specific:
-    var body = document.getElementById('body');
-    var nav = document.getElementById('my_nav');
-    var navBtn = nav.querySelector('button');
-    var navBar = nav.querySelector('[data-disclosure-content]');
-    var expandedClass = 'nav-expanded';
-
-    navBtn.addEventListener('click', function () {
-      if ( body.classList.contains(expandedClass) ) {
-        closeNav();
-      }
-      else {
-        openNav()
-      }
-    });
-
-    var openNav = function () {
-      body.classList.add(expandedClass);
-      document.addEventListener('click', docClick, false);
-    }
-
-    var closeNav = function () {
-      body.classList.remove(expandedClass);
-    }
-</script> -->
 
 </html>
