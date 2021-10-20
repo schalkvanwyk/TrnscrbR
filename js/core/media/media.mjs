@@ -19,10 +19,11 @@ export class MediaItem {
             .#loadMetaData();
     }
 
+    mediaMetaData = {};
     info = {};
-    metaData = {};
-    participants = [];
-    tags = [];
+    get metaData() { return this.mediaMetaData?.metaData ?? {}; };
+    get participants() { return this.mediaMetaData?.participants ?? []; };
+    get tags() { return this.mediaMetaData?.tags ?? []; };
 
     #loadMedia(source, target) {
         this.info = this.#mediaProvider(source, target);
@@ -31,10 +32,7 @@ export class MediaItem {
     async #loadMetaData() {
         let data = await this.#metaDataProvider();
         this.mediaMetaData = MediaMetaData.createFrom(data);
-        this.metaData = this.mediaMetaData.metaData;
-        this.participants = this.mediaMetaData.participants;
-        this.tags = this.mediaMetaData.tags;
-        this.#readMediaInfo(this.metaData);
+        this.#readMediaInfo(this.mediaMetaData.data);
         return this;
     }
     #readMediaInfo(metaData) {

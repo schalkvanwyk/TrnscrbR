@@ -12,10 +12,19 @@ import {
     dispatchDisplayErrorMessage
 } from './js/components/events.mjs'
 import {
+    mpLoaderSettings,
     transcriptMediaPlayerLoader
 } from './js/core/core.mjs'
 
-transcriptMediaPlayerLoader();
+let devHosts = [
+    'localhost',
+    '127.0.0.1'
+];
+
+if(!devHosts.includes(window.location.hostname)) {
+    mpLoaderSettings.mediaMetaDataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
+}
+transcriptMediaPlayerLoader(mpLoaderSettings);
 
 listenFor('click', '#clearTranscripts', handleClearTranscripts);
 listenFor('change', '#transcriptFileSource', handleJsonFileSelect);
