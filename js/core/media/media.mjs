@@ -1,44 +1,49 @@
+//TODO:Move all to MediaClientAPI
 export class MediaItem {
     #mediaProvider;
-    #metaDataProvider;
+    #metadataProvider;
 
-    constructor(mediaProvider, metaDataProvider) {
+    constructor(mediaProvider, metadataProvider) {
         this.#mediaProvider = mediaProvider;
-        this.#metaDataProvider = metaDataProvider;
+        this.#metadataProvider = metadataProvider;
     }
 
     static async createUsing(
         source, 
         targetPlayerLoader = s => {}, 
         mediaProvider = MediaFileBlobProvider.loadBlobTo, 
-        metaDataProvider = async () => {}) {
+        metadataProvider = async () => {}) {
         if(!source) throw new Error('Argument Required! The argument "source" is required.');
 
-        return await new MediaItem(mediaProvider, metaDataProvider)
+        return await new MediaItem(mediaProvider, metadataProvider)
             .#loadMedia(source, targetPlayerLoader)
             .#loadMetaData();
     }
 
-    mediaMetaData = {};
+    mediaMetadata = {};
     info = {};
-    get metaData() { return this.mediaMetaData?.metaData ?? {}; };
-    get participants() { return this.mediaMetaData?.participants ?? []; };
-    get tags() { return this.mediaMetaData?.tags ?? []; };
+    get metadata() { return this.mediaMetadata?.metadata ?? {}; };
+    get participants() { return this.mediaMetadata?.participants ?? []; };
+    get tags() { return this.mediaMetadata?.tags ?? []; };
 
     #loadMedia(source, target) {
         this.info = this.#mediaProvider(source, target);
         return this;
     }
     async #loadMetaData() {
-        let data = await this.#metaDataProvider();
-        this.mediaMetaData = MediaMetaData.createFrom(data);
-        this.#readMediaInfo(this.mediaMetaData.data);
+        let data = await this.#metadataProvider();
+        this.mediaMetadata = MediaMetaData.createFrom(data);
+        this.#readMediaInfo(this.mediaMetadata.data);
         return this;
     }
-    #readMediaInfo(metaData) {
-        this.info = MediaInfo.createFrom(metaData, this.info);
+    #readMediaInfo(metadata) {
+        this.info = MediaInfo.createFrom(metadata, this.info);
         return this;
     }
+}
+
+class MediaItemBuilder {
+    static async createUsing(){}
 }
 
 class MediaInfo {
@@ -81,7 +86,7 @@ class MediaMetaData {
         return new MediaMetaData(existing);
     }
 
-    get metaData() { return this.data.metaData; }
+    get metadata() { return this.data.metadata; }
 
     get participants() { return this.data.participants; }
 
@@ -95,6 +100,7 @@ class MediaMetaData {
     }
 }
 
+//TODO: Move to MediaMetaDataRestClient
 export class MediaMetaDataRestAPI {
     #baseUri;
 
@@ -115,6 +121,7 @@ export class MediaMetaDataRestAPI {
     }
 }
 
+//TODO: Move to Providers
 class MediaProvider {
     loadBlobTo(source, target){}
 }

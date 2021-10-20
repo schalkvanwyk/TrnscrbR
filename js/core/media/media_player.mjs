@@ -20,14 +20,14 @@ import {
 export const mpLoaderSettings = {
     elementName: undefined,
     templateLocation: './js/core/media/media_player.html',
-    mediaMetaDataRestAPIUri: 'http://localhost:3000',
+    mediaMetadataRestAPIUri: 'http://localhost:3000',
     mediaBlobProvider: new MediaFileBlobProvider().loadBlobTo,
-    metaDataProvider: ({})
+    metadataProvider: ({})
 }
 
 export var transcriptMediaPlayerLoader = (settings = mpLoaderSettings) => {
-    settings.metaDataProvider = async () => {
-        let apiClient = new MediaMetaDataRestAPI(settings.mediaMetaDataRestAPIUri);
+    settings.metadataProvider = async () => {
+        let apiClient = new MediaMetaDataRestAPI(settings.mediaMetadataRestAPIUri);
         return await apiClient.getById(1);
     };
     
@@ -42,7 +42,7 @@ function define(template, settings) {
         static #templateName = 'transcript-media-player-template';
         #template = {};
         #mediaBlobProvider = settings.mediaBlobProvider || ({});
-        #metaDataProvider = settings.metaDataProvider || ({});
+        #metadataProvider = settings.metadataProvider || ({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
         #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
@@ -73,7 +73,7 @@ function define(template, settings) {
                     };
 
                     MediaItem
-                        .createUsing(file, stream => this.mediaPlayer.src = stream, this.#mediaBlobProvider, this.#metaDataProvider)
+                        .createUsing(file, stream => this.mediaPlayer.src = stream, this.#mediaBlobProvider, this.#metadataProvider)
                         //TODO: add to play list...?
                         .then(mediaItem => { this.#mediaItems.push(mediaItem); });
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
@@ -165,6 +165,12 @@ function define(template, settings) {
                 let participantsContainer = $('#mediaParticipantsContainer>ol', $this.shadowRoot);
                 target.participants.forEach(participant => {
                     heWrapper.generate('li', participant, true, participantsContainer);
+                });
+
+                let metadataContainer = $('#mediaMetadataContainer>ul', $this.shadowRoot);
+                let metadata = target.metadata;
+                Object.entries(metadata).map(([k, v]) => {
+                    this.#bindListItem(metadata, k, `${k}: `, metadataContainer);
                 });
 
                 let tagsContainer = $('#mediaTagsContainer>ul', $this.shadowRoot);

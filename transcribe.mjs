@@ -22,7 +22,7 @@ let devHosts = [
 ];
 
 if(!devHosts.includes(window.location.hostname)) {
-    mpLoaderSettings.mediaMetaDataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
+    mpLoaderSettings.mediaMetadataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
 }
 transcriptMediaPlayerLoader(mpLoaderSettings);
 
