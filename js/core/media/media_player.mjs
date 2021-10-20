@@ -7,11 +7,6 @@ import {
     ArrayObserver,
     HtmlElementWrapper as heWrapper
 } from './../../utils/utils.mjs'
-import {
-    MediaItem,
-    MediaMetaDataRestAPI,
-    MediaFileBlobProvider
-} from './media.mjs';
 
 //https://stackoverflow.com/a/55081177/26700
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/
@@ -20,17 +15,12 @@ import {
 export const mpLoaderSettings = {
     elementName: undefined,
     templateLocation: './js/core/media/media_player.html',
-    mediaMetadataRestAPIUri: 'http://localhost:3000',
-    mediaBlobProvider: new MediaFileBlobProvider().loadBlobTo,
-    metadataProvider: ({})
+    mediaItemBuilder: (source, settings) => {},
+    mediaBlobProvider: (source, targetLoader, mediaInfoBuilder) => {},
+    metadataProvider: async () => {}
 }
 
 export var transcriptMediaPlayerLoader = (settings = mpLoaderSettings) => {
-    settings.metadataProvider = async () => {
-        let apiClient = new MediaMetaDataRestAPI(settings.mediaMetadataRestAPIUri);
-        return await apiClient.getById(1);
-    };
-    
     fetch(settings.templateLocation)
         .then(stream => stream.text())
         .then(text => define(text, settings));
@@ -43,6 +33,7 @@ function define(template, settings) {
         #template = {};
         #mediaBlobProvider = settings.mediaBlobProvider || ({});
         #metadataProvider = settings.metadataProvider || ({});
+        #mediaItemBuilder = settings.mediaItemBuilder || ({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
         #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
@@ -72,8 +63,13 @@ function define(template, settings) {
                         return;
                     };
 
-                    MediaItem
-                        .createUsing(file, stream => this.mediaPlayer.src = stream, this.#mediaBlobProvider, this.#metadataProvider)
+                    this.#mediaItemBuilder(
+                        file, 
+                        {
+                            targetPlayerLoader: stream => this.mediaPlayer.src = stream,
+                            mediaProvider: this.#mediaBlobProvider,
+                            metadataProvider: this.#metadataProvider
+                        })
                         //TODO: add to play list...?
                         .then(mediaItem => { this.#mediaItems.push(mediaItem); });
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);

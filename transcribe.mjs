@@ -13,17 +13,27 @@ import {
 } from './js/components/events.mjs'
 import {
     mpLoaderSettings,
+    MediaItemBuilder,
+    MediaMetaDataRestClient,
+    MediaFileBlobProvider,
     transcriptMediaPlayerLoader
 } from './js/core/core.mjs'
 
-let devHosts = [
+const devHosts = [
     'localhost',
     '127.0.0.1'
 ];
 
+let mediaMetadataRestAPIUri = 'http://localhost:3000';
 if(!devHosts.includes(window.location.hostname)) {
-    mpLoaderSettings.mediaMetadataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
+    mediaMetadataRestAPIUri = 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR';
 }
+const mediaMetaDataRestClient = new MediaMetaDataRestClient(mediaMetadataRestAPIUri);
+
+mpLoaderSettings.mediaItemBuilder = MediaItemBuilder.createUsing;
+mpLoaderSettings.mediaBlobProvider = new MediaFileBlobProvider().loadBlobTo;
+mpLoaderSettings.metadataProvider = async () => { return await mediaMetaDataRestClient.getById(1); };
+
 transcriptMediaPlayerLoader(mpLoaderSettings);
 
 listenFor('click', '#clearTranscripts', handleClearTranscripts);
