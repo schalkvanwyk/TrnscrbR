@@ -75,6 +75,9 @@ function define(template, settings) {
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
                 });
             });
+
+            //TODO: Improve with bindings...
+            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
             
             $Id('mediaParticipantsContainer', this.shadowRoot).addEventListener('input', this.#mediaParticipantsChanged);
             this.#mediaParticipantsContainerObserver.observe(
