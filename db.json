@@ -6,7 +6,7 @@
             "createdOn": "2021-10-19T13:40:20Z",
             "createdBy": "Joe Soap (ext 104)",
             "sourceUri": "https://some.place/safe/Joe_Soap_104-+001234567890_20211019134020.wav",
-            "metaData": {
+            "metadata": {
                 "mediaType": "audio/wav",
                 "direction": "outgoing",
                 "caller": "Joe_Soap_104",

@@ -1,35 +1,26 @@
-//TODO: remove not working
+//Remove:not working
 // import html from './media_player.html'
 import {
     $,
     $Id,
+    Binding,
     ArrayObserver,
     HtmlElementWrapper as heWrapper
 } from './../../utils/utils.mjs'
-import {
-    MediaItem,
-    MediaMetaDataRestAPI,
-    MediaFileBlobProvider
-} from './media.mjs';
 
 //https://stackoverflow.com/a/55081177/26700
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/
 //https://www.webcomponents.org/community/articles/introduction-to-html-imports
 
-const loaderSettings = {
+export const mpLoaderSettings = {
     elementName: undefined,
     templateLocation: './js/core/media/media_player.html',
-    mediaMetaDataRestAPIUri: 'https://my-json-server.typicode.com/schalkvanwyk/TrnscrbR',
-    fileProvider: new MediaFileBlobProvider().loadBlobTo,
-    metaDataProvider: ({})
+    mediaItemBuilder: (source, settings) => {},
+    mediaBlobProvider: (source, targetLoader, mediaInfoBuilder) => {},
+    metadataProvider: async () => {}
 }
 
-export var transcriptMediaPlayerLoader = (settings = loaderSettings) => {
-    settings.metaDataProvider = async () => {
-        let apiClient = new MediaMetaDataRestAPI(settings.mediaMetaDataRestAPIUri);
-        return await apiClient.getById(1);
-    };
-    
+export var transcriptMediaPlayerLoader = (settings = mpLoaderSettings) => {
     fetch(settings.templateLocation)
         .then(stream => stream.text())
         .then(text => define(text, settings));
@@ -40,8 +31,9 @@ function define(template, settings) {
         static #elementName = 'transcript-media-player';
         static #templateName = 'transcript-media-player-template';
         #template = {};
-        #fileProvider = settings.fileProvider || ({});
-        #metaDataProvider = settings.metaDataProvider || ({});
+        #mediaBlobProvider = settings.mediaBlobProvider || ({});
+        #metadataProvider = settings.metadataProvider || ({});
+        #mediaItemBuilder = settings.mediaItemBuilder || ({});
         #mediaItems = [];
         #mediaItemsObserver = new ArrayObserver(this.#mediaItems);
         #mediaParticipantsContainerObserver = new MutationObserver(this.#mediaParticipantsContainerMutated);
@@ -59,6 +51,9 @@ function define(template, settings) {
 
             this.#addPlayerEventHandlers();
 
+            //TODO: Improve with bindings...
+            this.#mediaItemsObserver.Observe((t, a) => this.#mediaItemsObserved(t, a, this));
+
             $Id('mediaFileSource', this.shadowRoot)?.addEventListener('input', e => {
                 var files = Array.from(e.target.files);
                 files.forEach(file => {
@@ -68,8 +63,13 @@ function define(template, settings) {
                         return;
                     };
 
-                    MediaItem
-                        .createUsing(file, stream => this.mediaPlayer.src = stream, this.#fileProvider, this.#metaDataProvider)
+                    this.#mediaItemBuilder(
+                        file, 
+                        {
+                            targetPlayerLoader: stream => this.mediaPlayer.src = stream,
+                            mediaProvider: this.#mediaBlobProvider,
+                            metadataProvider: this.#metadataProvider
+                        })
                         //TODO: add to play list...?
                         .then(mediaItem => { this.#mediaItems.push(mediaItem); });
                     // this.#participantsObserver = new ArrayObserver(mediaItem.participants);
@@ -115,7 +115,7 @@ function define(template, settings) {
         }
 
         render() {
-            //Not working...
+            //Remove:Not working...
             // let {cssContent, htmlContent} = this.#htmlToElement(html);
             // this.shadowRoot.innerHTML = '';
             // shadowRoot.appendChild(htmlContent);
@@ -140,20 +140,60 @@ function define(template, settings) {
 
                 let infoContainer = $('#mediaInfoContainer>ul', $this.shadowRoot);
 
-                heWrapper.generate('li', `Name: ${info.blobName}`, true, infoContainer);
-                heWrapper.generate('li', `Size: ${info.blobSize}`, true, infoContainer);
-                heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, infoContainer);
-                heWrapper.generate('li', `Mime Type: ${info.mimeType}`, true, infoContainer);
+                infoContainer.innerHTML = '';
+
+                this.#bindListItem(info, 'blobName', 'Name: ', infoContainer);
+                // heWrapper.generate('li', `Name: ${info.blobName ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'blobSize', 'Size: ', infoContainer);
+                // heWrapper.generate('li', `Size: ${info.blobSize ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'lastModifiedOn', 'Last Modified On: ', infoContainer);
+                // heWrapper.generate('li', `Last Modified On: ${info.lastModifiedOn}`, true, infoContainer);
+                this.#bindListItem(info, 'mimeType', 'Mime Type: ', infoContainer);
+                // heWrapper.generate('li', `Mime Type: ${info.mimeType ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'effectiveFrom', 'Effective From: ', infoContainer);
+                // heWrapper.generate('li', `Effective From: ${info.effectiveFrom ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'createdOn', 'Created On: ', infoContainer);
+                // heWrapper.generate('li', `Created On: ${info.createdOn ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'createdBy', 'Created By: ', infoContainer);
+                // heWrapper.generate('li', `Created By: ${info.createdBy ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'sourceUri', 'Source Uri: ', infoContainer);
+                // heWrapper.generate('li', `Source Uri: ${info.sourceUri ?? ''}`, true, infoContainer);
+                this.#bindListItem(info, 'id', 'Metadata Id: ', infoContainer);
+                // heWrapper.generate('li', `Metadata Id: ${info.id ?? ''}`, true, infoContainer);
 
                 let participantsContainer = $('#mediaParticipantsContainer>ol', $this.shadowRoot);
                 target.participants.forEach(participant => {
                     heWrapper.generate('li', participant, true, participantsContainer);
                 });
 
+                let metadataContainer = $('#mediaMetadataContainer>ul', $this.shadowRoot);
+                let metadata = target.metadata;
+                Object.entries(metadata).map(([k, v]) => {
+                    this.#bindListItem(metadata, k, `${k}: `, metadataContainer);
+                });
+
                 let tagsContainer = $('#mediaTagsContainer>ul', $this.shadowRoot);
                 target.tags.forEach(tag => {
                     heWrapper.generate('li', tag, true, tagsContainer);
                 });
+            }
+        }
+
+        #bindListItem(target, propertyName, value, parent) {
+            let boundItem = $(`li>span[data-binding="${propertyName}]`, parent);
+            if(!boundItem) {
+                boundItem = heWrapper
+                    .generate('li', value, true, parent)
+                    .createChildAndUse('span', target[propertyName] ?? '')
+                    .element;
+                
+                boundItem.dataset.binding = propertyName;
+                
+                let binding = new Binding({object: target, property: propertyName});
+                binding.addBinding(boundItem, 'innerHtml');
+
+                if(!target.bindings) target.bindings = [];
+                target.bindings.push(binding);
             }
         }
 
@@ -221,7 +261,7 @@ function define(template, settings) {
             });
         }
 
-        //Not working...
+        //Remove:Not working...
         //https://roshan-khandelwal.medium.com/web-components-c7aef23fe478
         // #htmlToElement(html) {
         //     let template = this.shadowRoot.createElement('template');
