@@ -11,5 +11,6 @@ export function $$(selector, scope = document) {
     return Array.from(scope.querySelectorAll(selector));
 }
 
+
 //https://sebastiandedeyne.com/javascript-framework-diet/selecting-elements-part-2/
 //Element.closest() and Element.matches()

@@ -5,11 +5,15 @@ import {
 import {
     Router
 } from './utils/router.mjs'
+// import {
+//     DashboardPage 
+// } from './../pages.mjs'
+
 
 export class theApp {
     static #routingTable = [
-        { path: '/', resource: './dashboard.htm' },
-        { path: 'media', resource: './medialisting.htm' }
+        // { path: '/', resource: DashboardPage },
+        // { path: 'media', resource: './medialisting.htm' }
     ]
     
     static environment = (() => {

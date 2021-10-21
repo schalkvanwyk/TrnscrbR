@@ -26,6 +26,11 @@ export class HtmlElementWrapper {
         this.element.style.display = this.display ? '' : 'none';
         return this;
     }
+
+    setAttribute = (attributeName) => (value) => {
+        this.element.setAttribute(attributeName, value)
+        return this;
+    };
     
     appendChild(child) {
         this.element.appendChild(child.element);
