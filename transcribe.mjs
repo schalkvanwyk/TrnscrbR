@@ -1,4 +1,17 @@
-import { 
+// import { 
+//     $,
+//     $$,
+//     $Id,
+//     listen as listenFor,
+//     Observer,
+//     MapObserver,
+//     TimeConversion,
+//     HtmlElementWrapper as heWrapper
+// } from './js/utils.mjs';
+import {
+    dispatchDisplayErrorMessage
+} from './js/components/events.mjs'
+import {
     $,
     $$,
     $Id,
@@ -6,26 +19,24 @@ import {
     Observer,
     MapObserver,
     TimeConversion,
-    HtmlElementWrapper as heWrapper
-} from './js/utils/utils.mjs';
-import {
-    dispatchDisplayErrorMessage
-} from './js/components/events.mjs'
-import {
+    HtmlElementWrapper as heWrapper,
+
     theApp,
-    mpLoaderSettings,
-    MediaItemBuilder,
-    MediaFileBlobProvider,
-    transcriptMediaPlayerLoader
+    Core,
+    // MediaItemBuilder,
+    // MediaFileBlobProvider,
+    // MediaPlayer
+    // mpLoaderSettings,
+    // transcriptMediaPlayerLoader
 } from './js/app.mjs'
 
 const mediaMetaDataRestClient = theApp.mediaMetaDataRestClient;
 
-mpLoaderSettings.mediaItemBuilder = MediaItemBuilder.createUsing;
-mpLoaderSettings.mediaBlobProvider = new MediaFileBlobProvider().loadBlobTo;
-mpLoaderSettings.metadataProvider = async () => { return await mediaMetaDataRestClient.getById(1); };
+Core.Media.MediaPlayer.mpLoaderSettings.mediaItemBuilder = Core.Media.MediaItemBuilder.createUsing;
+Core.Media.MediaPlayer.mpLoaderSettings.mediaBlobProvider = new Core.Media.MediaFileBlobProvider().loadBlobTo;
+Core.Media.MediaPlayer.mpLoaderSettings.metadataProvider = async () => { return await mediaMetaDataRestClient.getById(1); };
 
-transcriptMediaPlayerLoader(mpLoaderSettings);
+Core.Media.MediaPlayer.transcriptMediaPlayerLoader(Core.Media.MediaPlayer.mpLoaderSettings);
 
 listenFor('click', '#clearTranscripts', handleClearTranscripts);
 listenFor('change', '#transcriptFileSource', handleJsonFileSelect);

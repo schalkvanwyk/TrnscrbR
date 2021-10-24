@@ -1,37 +1,36 @@
-import RxsComponentBase from './js/components/rxscomponentbase.mjs';
+import { DashboardPage } from './pages/dashboardpage.mjs';
 
-// document.getElementById('page').appendChild(document.createElement('div')).innerText = 'Dynamic script content.';
+let templateLoader = () => {}; // return '<template>testing</template>'; };// return '<div>testing</div>'; };
 
-let templateLoader = () => { return '<template>testing</template>'; };
-
-let dashboardPage = RxsComponentBase.defineWithTemplate(define, templateLoader);
-
-export const render = () => {
-    dashboardPage();
-}
-
-function define(template) {
-    class DashboardPage extends RxsComponentBase {
-        static get elementName() { return `${DashboardPage.componentPrefix}-page`; }
+export const defineDashboardPage = (template) => {
+    class Dashboard extends DashboardPage {
+        // static get elementName() { return `${Dashboard.componentPrefix}-page-dashboardpage`; }
+        static get defaultTemplateId() { return `${Dashboard.componentPrefix}-page-dashboardpagetemplate`; }
 
         constructor() {
             super();
-
-            this.attachShadow({ mode: 'open' });
-
             if(template) this.loadTemplate(template);
         }
 
-        connectedCallback() {
-            this.render();
-        }
+        // connectedCallback() {
+        //     this.render();
+        // }
 
-        render() {
-            this.renderTemplate(this.shadowRoot);
-        }
+        // render() {
+        //     // Not needed when template is a declarative shadow root
+        //     // this.renderInto(this.shadowRoot);
+        // }
     }
 
-    return () => DashboardPage.define(DashboardPage);
+    return () => Dashboard.define(Dashboard);
 }
 
-//See: https://alligator.io/web-components/attributes-properties/
+let dashboardPage = DashboardPage.defineWithTemplate(defineDashboardPage, templateLoader);
+
+export const renderDashboardPage = () => {
+    dashboardPage();
+
+    //return customElements.get(Dashboard);
+}
+
+export default renderDashboardPage();

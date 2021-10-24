@@ -6,7 +6,7 @@ import {
     Binding,
     ArrayObserver,
     HtmlElementWrapper as heWrapper
-} from './../../utils/utils.mjs'
+} from '/js/utils.mjs'
 
 //https://stackoverflow.com/a/55081177/26700
 //https://www.html5rocks.com/en/tutorials/webcomponents/imports/

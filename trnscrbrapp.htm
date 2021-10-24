@@ -156,7 +156,7 @@
             theApp
         } from './js/app.mjs'
 
-        let router = () => theApp.router.applyTo(window.location);
+        let router = async () => await theApp.router.applyTo(window.location);
         
         window.addEventListener('hashchange', router);
         window.addEventListener('load', router);

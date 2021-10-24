@@ -1,8 +1,4 @@
 //https://dev.to/pixari/build-a-very-basic-spa-javascript-router-2k4p
-class ErrorComponent {
-
-}
-
 export class Router {
     #settings;
     #routes;
@@ -20,18 +16,20 @@ export class Router {
 
         let path = Router.getPathFrom(location.hash);
         
-        const { resource = ErrorComponent } = Router.findResourceByPath(path, this.#routes) || {};
+        // Only returns string result matching patern, so no arrow functions
+        const { resource = 'error.htm' } = Router.findResourceByPath(path, this.#routes) || {};
 
-        Router.render(resource, element);
+        await Router.render(resource, element);
     }
 
     static getPathFrom = (locationHash) => locationHash.slice(1).toLowerCase() || '/';
 
-    static findResourceByPath = (path, routes) => routes.find(r => r.path.match(new RegExp(`^\\${path}$`, 'gm'))) || undefined;
+    static findResourceByPath = (path, routes) => routes.find(r => r.path.match(new RegExp(`^${path}$`, 'gm'))) || undefined;
 
-    static render = (resource, parent) => {
-        resource.define(resource);
-        // parent.appendChild();
+    static async render(resource, parent) {
+        let module = await import(resource);
+        parent.innerHTML = null;
+        await module.renderInto(parent);
     }
 
     // static renderPage() {

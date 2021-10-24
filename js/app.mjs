@@ -1,19 +1,18 @@
-export * from './core/core.mjs';
-import {
-    MediaMetaDataRestClient
-} from './core/media/media_metadata_restclient.mjs';
+export * from './utils.mjs';
+export * as Core from './core.mjs';
 import {
     Router
-} from './utils/router.mjs'
-// import {
-//     DashboardPage 
-// } from './../pages.mjs'
-
+} from './utils.mjs';
+import {
+    Media
+} from './core.mjs';
 
 export class theApp {
     static #routingTable = [
-        // { path: '/', resource: DashboardPage },
-        // { path: 'media', resource: './medialisting.htm' }
+        { path: '/', resource: '/pages/dashboardpage.mjs' },
+        { path: 'dashboard', resource: '/pages/dashboardpage.mjs' },
+        { path: 'media', resource: '/pages/medialistingpage.mjs' },
+        { path: 'sample', resource: '/pages/samplepage.mjs' }
     ]
     
     static environment = (() => {
@@ -56,7 +55,7 @@ export class theApp {
 
     static get mediaMetaDataRestClient() {
         Object.defineProperty(this, 'mediaMetaDataRestClient', {
-            value: new MediaMetaDataRestClient({
+            value: new Media.MediaMetaDataRestClient({
                 baseUri: appSettings.mediaMetadataRestAPIUri, 
                 environment: appEnvironment,
                 mockEnabled: appEnvironment.isDevelopment()
