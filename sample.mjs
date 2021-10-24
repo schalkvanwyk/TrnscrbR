@@ -5,7 +5,7 @@ let templateLoader = () => {}; // return '<template>testing</template>'; };// re
 export const defineSamplePage = (template) => {
     class Sample extends SamplePage {
         // static get elementName() { return `${Sample.componentPrefix}-page-samplepage`; }
-        static get defaultTemplateId() { return `${Sample.componentPrefix}-page-samplepagetemplate`; }
+        // static get defaultTemplateId() { return `${Sample.componentPrefix}-page-samplepagetemplate`; }
 
         constructor() {
             super();

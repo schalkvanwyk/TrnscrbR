@@ -5,7 +5,7 @@ let templateLoader = () => {}; // return '<template>testing</template>'; };// re
 export const defineDashboardPage = (template) => {
     class Dashboard extends DashboardPage {
         // static get elementName() { return `${Dashboard.componentPrefix}-page-dashboardpage`; }
-        static get defaultTemplateId() { return `${Dashboard.componentPrefix}-page-dashboardpagetemplate`; }
+        // static get defaultTemplateId() { return `${Dashboard.componentPrefix}-page-dashboardpagetemplate`; }
 
         constructor() {
             super();
