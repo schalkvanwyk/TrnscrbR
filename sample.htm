@@ -1,27 +1,47 @@
-<html>
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
 <head>
-    <style>
-        rxs-page:not(:defined) > template[shadowroot] ~ *  {
-          display: none;
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="AWS Transcription Viewer" />
+
+    <title>Trnscrbr - Sample</title>
+
+    <script type="application/javascript">
+        // remove no-js and add 'js' to the HTML
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
 </head>
-<body>
-    <rxs-page-samplepage shadowMode="open"> <!-- -->
-        <template id="pageContentTemplate"> <!-- shadowroot="open" -->
-            <div>This is a sample page!</div>
-            <nav>
-                <li><a href="#">Home</a></li>
-                <li><a href="#media">List All Media</a></li>
-            </nav>
-        </template>
-    </rxs-page-samplepage>
+
+<header>
+    <h2>Sample</h2>
+</header>
+
+<body id="body">
+    <main id="page_content" aria-label="Media Browsing">
+        <rxs-page-samplepage shadowMode="open">
+            <!-- -->
+            <style>
+                rxs-page:not(:defined)>template[shadowroot]~* {
+                    display: none;
+                }
+            </style>
+            <template id="pageContentTemplate">
+                <!-- shadowroot="open" -->
+                <div>This is a sample page!</div>
+            </template>
+        </rxs-page-samplepage>
+    </main>
     <script type="module" src="./sample.mjs"></script>
-<!-- 
+    <!-- 
         import { render as renderSamplePage } from './pages/samplepage.mjs'
 
         render();
     </script>
- -->
+     -->
 </body>
+
 </html>

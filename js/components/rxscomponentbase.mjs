@@ -89,10 +89,17 @@ export default class RxsComponentBase extends HTMLElement {
     }
 
     renderInto = (container) => {
-        let templateContainer = $(`${this.contentContainerElementName}#${this.contentId}`, container);
+        let shadowRoot = container.shadowRoot;
+        if(!shadowRoot) {
+            shadowRoot = container.attachShadow({ mode: 'open' });
+        } else {
+            container.shadowRoot.innerHTML = '';
+        }
+
+        let templateContainer = $(`${this.contentContainerElementName}#${this.contentId}`, shadowRoot);
 
         if (!templateContainer) templateContainer = this
-            .createChild(this.contentContainerElementName, null, true, container)
+            .createChild(this.contentContainerElementName, null, true, shadowRoot)
             .setAttribute('id')(this.contentId)
             .element;
 
@@ -127,9 +134,9 @@ export default class RxsComponentBase extends HTMLElement {
         await fetch(templatePath)
             .then(stream => stream.text())
             .then(template => {
-                let fragment = new DOMParser().parseFromString(template, 'text/html', { includeShadowRoot: true });
-                let elementNode = fragment.querySelector(this.localName);
-                let element = document.importNode(elementNode, true);
+                const fragment = new DOMParser().parseFromString(template, 'text/html', { includeShadowRoot: true });
+                const elementNode = fragment.querySelector(this.localName);
+                const element = document.importNode(elementNode, true);
                 return element.querySelector(`template#${this.templateId}`);
             })
             .then(templateContainer => {

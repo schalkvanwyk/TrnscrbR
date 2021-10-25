@@ -12,7 +12,10 @@ export class theApp {
         { path: '/', resource: '/pages/dashboardpage.mjs' },
         { path: 'dashboard', resource: '/pages/dashboardpage.mjs' },
         { path: 'media', resource: '/pages/medialistingpage.mjs' },
-        { path: 'sample', resource: '/pages/samplepage.mjs' }
+        { path: 'mediatranscriptionviewer', resource: '/pages/mediatranscriptionviewer.mjs' },
+        { path: 'transcribe', resource: '/transcribe.mjs' },
+        { path: 'sample', resource: '/pages/samplepage.mjs' },
+        { path: 'sampletemplate', resource: '/pageloader?page=sampletemplate.htm' }
     ]
     
     static environment = (() => {

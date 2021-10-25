@@ -8,38 +8,12 @@
 
     <title>Trnscrbr - Media Listing</title>
 
-    <script type="text/javascript">
-      // remove no-js and add 'js' to the HTML
-      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    <script type="application/javascript">
+        // remove no-js and add 'js' to the HTML
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
     </script>
-    
-    <link rel="stylesheet" type="text/css" href="css/main.css" />
-    <style>
-        ul.list {
-            border: solid; 
-            border-left: 0; 
-            border-width: thin; 
-            padding: 0px;
-        }
 
-        .list li {
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: minmax(25px, auto);
-        }
-
-        .list li > div {
-            border-left: solid; 
-            border-width: thin;
-        }
-
-        .list li > div.td {
-            border-top: solid;
-            border-width: thin;
-        }
-    </style>
-
-    <script type="text/javascript" src="js/components/list.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
 </head>
 
 <header>
@@ -48,60 +22,89 @@
 
 <body id="body">
     <main id="page_content" aria-label="Media Browsing">
-        <section id="mediaListingContainer">
-            <ul class="list">
-                <li style="background-color: aliceblue;">
-                    <div>Key</div>
-                    <div>Name</div>
-                    <div>Created On</div>
+        <rxs-page-medialistingpage>
+            <style>
+                ul.list {
+                    border: solid;
+                    border-left: 0;
+                    border-width: thin;
+                    padding: 0px;
+                }
+        
+                .list li {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    grid-template-rows: minmax(25px, auto);
+                }
+        
+                .list li>div {
+                    border-left: solid;
+                    border-width: thin;
+                }
+        
+                .list li>div.td {
+                    border-top: solid;
+                    border-width: thin;
+                }
+            </style>
+        
+            <script type="application/javascript" src="/js/components/list.js" defer></script>
+
+            <section id="mediaListingContainer">
+                <ul class="list">
+                    <li style="background-color: aliceblue;">
+                        <div>Key</div>
+                        <div>Name</div>
+                        <div>Created On</div>
+                    </li>
+                </ul>
+            </section>
+
+            <div style="display:none;">
+                <li id="mediaListingItem">
+                    <div class="td"><a class="link key"></a></div>
+                    <div class="td blob_name"></div>
+                    <div class="td createdOn"></div>
+                    <div class="td visually-hidden">Details</div>
                 </li>
-            </ul>
-        </section>
+            </div>
 
-        <div style="display:none;">
-            <li id="mediaListingItem">
-                <div class="td"><a class="link key"></a></div>
-                <div class="td blob_name"></div>
-                <div class="td createdOn"></div>
-                <div class="td visually-hidden">Details</div>
-            </li>
-        </div>
+            <script type="module">
+                import {
+                    theApp
+                } from '/js/app.mjs'
+
+                const NaN = '[-Unknown-]';
+
+                let values = await theApp
+                    .mediaMetaDataRestClient
+                    .listAll()
+                    .then(result => result
+                        .map(o => {
+                            return {
+                                id: o.id ?? null,
+                                key: o.key ?? NaN,
+                                createdOn: o.createdOn ?? null,
+                                blob_name: o.blob?.name ?? null,
+                                link: o.id ? `#/media/${o.id}` : null
+                            };
+                        }));
+
+                const options = {
+                    valueNames: [
+                        'key',
+                        'blob_name',
+                        'createdOn',
+                        { data: ['id'] },
+                        { attr: 'href', name: 'link' },
+                    ],
+                    item: 'mediaListingItem'
+                };
+
+                const mediaList = new List('mediaListingContainer', options, values);
+            </script>
+        </rxs-page-medialistingpage>
     </main>
-
-    <script type="module">
-        import {
-            theApp
-        } from './js/app.mjs'
-
-        const NaN = '[-Unknown-]';
-
-        let values = await theApp
-                .mediaMetaDataRestClient
-                .listAll()
-                .then(result => result
-                    .map(o => {
-                        return {
-                            id: o.id ?? null,
-                            key: o.key ?? NaN,
-                            createdOn: o.createdOn ?? null,
-                            blob_name: o.blob?.name ?? null,
-                            link: o.id ? `#/media/${o.id}` : null
-                        };
-                    }));
-
-        const options = {
-            valueNames: [ 
-                'key', 
-                'blob_name', 
-                'createdOn', 
-                { data: ['id'] },
-                { attr: 'href', name: 'link' },
-            ],
-            item: 'mediaListingItem'
-        };
-
-        const mediaList = new List('mediaListingContainer', options, values);
-    </script>
 </body>
 <footer>
 </footer>
