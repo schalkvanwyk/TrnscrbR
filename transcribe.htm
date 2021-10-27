@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
+
 <head>
     <meta charset="utf-8" />
     <!-- <meta http-equiv="x-ua-compatible" content="ie=edge" /> -->
@@ -19,10 +20,10 @@
     <meta name="google" content="notranslate">
 
     <script type="text/javascript">
-      // remove no-js and add 'js' to the HTML
-      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        // remove no-js and add 'js' to the HTML
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
     </script>
-    
+
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="css/aria.disclosure.css" />
     <link rel="stylesheet" type="text/css" href="css/simptip.css" media="screen,projection" />
@@ -64,7 +65,7 @@
             max-width: 992px;
         }
 
-        section.transcript h1 button{
+        section.transcript h1 button {
             float: right;
             margin-right: 10px;
             font-size: medium;
@@ -97,7 +98,8 @@
 
         section.transcript div.segmented p {
             /* display: inline; */
-            margin: 2px; /* between paragraphs */
+            margin: 2px;
+            /* between paragraphs */
         }
 
         /* section.transcript div.segmented div {
@@ -113,6 +115,7 @@
             /* height: 22px; */
             /* display: inline-block; */
         }
+
         /* section.transcript div.segmented span.dialogue {
             -webkit-filter: blur(1.2px);
             filter: blur(1.2px);
@@ -125,8 +128,9 @@
         section.transcript div.segmented span.speaking {
             background-color: yellow;
             -webkit-filter: blur(0px);
-            filter:blur(0px);
+            filter: blur(0px);
         }
+
         section.transcript div.segmented span.spoke {
             background-color: lightyellow;
             -webkit-filter: blur(0.5px);
@@ -176,34 +180,42 @@
             background-color: darkgoldenrod;
             opacity: 75%;
         }
+
         .speaker-2 {
             background-color: darkgreen;
             opacity: 75%;
         }
+
         .speaker-3 {
             background-color: darkblue;
             opacity: 75%;
         }
+
         .speaker-4 {
             background-color: darkcyan;
             opacity: 75%;
         }
+
         .speaker-5 {
             background-color: darksalmon;
             opacity: 75%;
         }
+
         .speaker-6 {
             background-color: darkslateblue;
             opacity: 75%;
         }
+
         .speaker-7 {
             background-color: darkolivegreen;
             opacity: 75%;
         }
+
         .speaker-8 {
             background-color: darkkhaki;
             opacity: 75%;
         }
+
         .speaker-9 {
             background-color: darkseagreen;
             opacity: 75%;
@@ -213,15 +225,47 @@
     <script type="application/javascript" src="js/plugins.js" defer></script>
     <script type="application/javascript" src="js/components/aria.disclosure.js" defer></script>
     <!-- <script type="text/javascript" src="js/components/video-player.js"></script> -->
+
+    <link rel="modulepreload" href="js/components/errormsngr.mjs" />
     <script type="module" src="js/components/errormsngr.mjs"></script>
     <!-- <script type="module" src="js/core/media/media_player.mjs"></script> -->
+
+    <!-- https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/ -->
+
+    <link rel="modulepreload" href="js/components/events.mjs" />
+
+    <link rel="modulepreload" href="js/utils.mjs" />
+    <link rel="modulepreload" href="js/utils/listen.mjs" />
+    <link rel="modulepreload" href="js/utils/query.mjs" />
+    <link rel="modulepreload" href="js/utils/binding.mjs" />
+    <link rel="modulepreload" href="js/utils/htmlelementwrapper.mjs" />
+
+    <link rel="modulepreload" href="js/core.mjs" />
+    <link rel="modulepreload" href="js/core/media.mjs" />
+    <link rel="modulepreload" href="js/core/media/media_clientapi.mjs" />
+    <link rel="modulepreload" href="js/core/media/media_metadata_restclient.mjs" />
+    <link rel="modulepreload" href="js/core/media/media_providers.mjs" />
+    <link rel="modulepreload" href="js/core/media/media_player.mjs" />
+
+    <link rel="modulepreload" href="js/app.mjs" />
+    <link rel="modulepreload" href="transcribe.mjs" />
+
+    <!-- https://github.com/WICG/import-maps -->
+    <script type="importmap">
+    {
+        "imports": {
+            "utils": "/js/utils.mjs",
+            "core": "/js/core.mjs"
+        }
+    }
+    </script>
 </head>
 
-<header>
-    <h1><abbr>Trnscrbr</abbr> - A Transcription Viewer</h1>
-</header>
-
 <body id="body">
+    <header>
+        <h1><abbr>Trnscrbr</abbr> - A Transcription Viewer</h1>
+    </header>
+
     <main class="page" aria-label="Transcript Workspace">
         <section id="mediaSection" class="mediaPlayer">
             <h1>Media</h1>
@@ -230,13 +274,17 @@
             <hr />
         </section>
         <section id="transcriptSection" class="transcript">
-            <h1>Transcript <button id="clearTranscripts" name="Clear" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Reset and clear loaded transcript data.">Clear</button></h1>
+            <h1>Transcript <button id="clearTranscripts" name="Clear"
+                    class="simptip-info simptip-multiline simptip-position-top"
+                    data-tooltip="Reset and clear loaded transcript data.">Clear</button></h1>
             <hr />
-            <label for="transcriptFileSource" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Click to select and load the transcript file">
+            <label for="transcriptFileSource" class="simptip-info simptip-multiline simptip-position-top"
+                data-tooltip="Click to select and load the transcript file">
                 Select the transcript file
                 <div id="transcriptFileName" class="file-name">No file selected</div>
             </label>
-            <input id="transcriptFileSource" name="transcriptFileSource" class="file-input hidden" type="file" accept=".json, text/json" />
+            <input id="transcriptFileSource" name="transcriptFileSource" class="file-input hidden" type="file"
+                accept=".json, text/json" />
             <error-msngr>
                 <style>
                     .Trnscrbr-ErrorContainer {
@@ -268,14 +316,18 @@
         </section>
         <section id="transcriptInfo" class="aside">
             <details>
-                <summary>Transcript Information <span style="float: left; padding-right: 5px; font-size: smaller;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see details about the transcript file">?</span></summary>
+                <summary>Transcript Information <span style="float: left; padding-right: 5px; font-size: smaller;"
+                        class="simptip-info simptip-multiline simptip-position-top"
+                        data-tooltip="Select to see details about the transcript file">?</span></summary>
                 <hr />
                 <div id="infoTranscriptContainer" class="info">
                     <ul></ul>
                 </div>
             </details>
             <details id="speakersContainer" class="speakers" open>
-                <summary>Speakers<span style="float: left; padding-right: 5px; font-size: smaller;" class="simptip-info simptip-multiline simptip-position-top" data-tooltip="Select to see speakers identified in the transcript">?</span></summary>
+                <summary>Speakers<span style="float: left; padding-right: 5px; font-size: smaller;"
+                        class="simptip-info simptip-multiline simptip-position-top"
+                        data-tooltip="Select to see speakers identified in the transcript">?</span></summary>
                 <hr />
                 <ul></ul>
             </details>

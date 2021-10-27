@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
+
 <head>
     <meta charset="utf-8" />
     <!-- <meta http-equiv="x-ua-compatible" content="ie=edge" /> -->
@@ -19,10 +20,10 @@
     <meta name="google" content="notranslate">
 
     <script type="text/javascript">
-      // remove no-js and add 'js' to the HTML
-      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        // remove no-js and add 'js' to the HTML
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
     </script>
-    
+
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="css/aria.disclosure.css" />
     <link rel="stylesheet" type="text/css" href="css/simptip.css" media="screen,projection" />
@@ -33,24 +34,27 @@
 
     <script type="text/javascript" src="js/plugins.js" defer></script>
     <script type="text/javascript" src="js/components/aria.disclosure.js" defer></script>
+
+    <link rel="modulepreload" href="/js/components/errormsngr.mjs" />
     <script type="module" src="js/components/errormsngr.mjs"></script>
 </head>
 
-<header>
-    <h1><abbr>Trnscrbr</abbr></h1>
-    <nav>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#media">List All Media</a></li>
-            <li><a href="#mediatranscriptionviewer">View Media Transcript</a></li>
-            <li><a href="#transcribe">Transcript Viewer</a></li>
-            <li><a href="#sample">sample</a></li>
-            <li><a href="#sampletemplate">sample template</a></li>
-        </ul>
-    </nav>
-</header>
 <body id="body">
-<!-- <div id="page" class="page">
+    <header>
+        <h1><abbr>Trnscrbr</abbr></h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#media">List All Media</a></li>
+                <li><a href="#mediatranscriptionviewer">View Media Transcript</a></li>
+                <li><a href="#transcribe">Transcript Viewer</a></li>
+                <li><a href="#sample">sample</a></li>
+                <li><a href="#sampletemplate">sample template</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- <div id="page" class="page">
     <div data-disclosure="A generated button">
         <p data-disclosure-content>
             This content will turn into a disclosure
@@ -141,7 +145,7 @@
     </section>
 </div> -->
 
-<!--
+    <!--
 <input id="testBindingInput" />
 <div id="testBinding"></div>
 <script>
@@ -160,56 +164,56 @@
     <main id="app" class="page">
     </main>
 
+    <footer>
+    </footer>
+
     <!-- <script type="module" src="./js/trnscrbrapp.mjs"></script> -->
     <script type="module">
         import {
             theApp
         } from './js/app.mjs'
 
-        let router = async () => await theApp.router.applyTo(window.location);
-        
+        const router = async () => await theApp.router.applyTo(window.location);
+
         window.addEventListener('hashchange', router);
         window.addEventListener('load', router);
     </script>
+
+    <!-- Disclosure demo https://github.com/scottaohara/aria_disclosure_widget -->
+    <!-- <script type="text/javascript">
+        var disclosure = '[data-disclosure]';
+        var els = document.querySelectorAll(disclosure);
+
+        // Generate all tab instances
+        for ( var i = 0; i < els.length; i++ ) {
+        var dis = new A11Ydisclosure( els[i] );
+        }
+
+        // navigation example specific:
+        var body = document.getElementById('body');
+        var nav = document.getElementById('my_nav');
+        var navBtn = nav.querySelector('button');
+        var navBar = nav.querySelector('[data-disclosure-content]');
+        var expandedClass = 'nav-expanded';
+
+        navBtn.addEventListener('click', function () {
+        if ( body.classList.contains(expandedClass) ) {
+            closeNav();
+        }
+        else {
+            openNav()
+        }
+        });
+
+        var openNav = function () {
+        body.classList.add(expandedClass);
+        document.addEventListener('click', docClick, false);
+        }
+
+        var closeNav = function () {
+        body.classList.remove(expandedClass);
+        }
+    </script> -->
 </body>
-
-<footer>
-</footer>
-
-<!-- Disclosure demo https://github.com/scottaohara/aria_disclosure_widget -->
-<!-- <script type="text/javascript">
-    var disclosure = '[data-disclosure]';
-    var els = document.querySelectorAll(disclosure);
-
-    // Generate all tab instances
-    for ( var i = 0; i < els.length; i++ ) {
-      var dis = new A11Ydisclosure( els[i] );
-    }
-
-    // navigation example specific:
-    var body = document.getElementById('body');
-    var nav = document.getElementById('my_nav');
-    var navBtn = nav.querySelector('button');
-    var navBar = nav.querySelector('[data-disclosure-content]');
-    var expandedClass = 'nav-expanded';
-
-    navBtn.addEventListener('click', function () {
-      if ( body.classList.contains(expandedClass) ) {
-        closeNav();
-      }
-      else {
-        openNav()
-      }
-    });
-
-    var openNav = function () {
-      body.classList.add(expandedClass);
-      document.addEventListener('click', docClick, false);
-    }
-
-    var closeNav = function () {
-      body.classList.remove(expandedClass);
-    }
-</script> -->
 
 </html>

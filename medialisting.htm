@@ -16,11 +16,11 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
 </head>
 
-<header>
-    <h2>Media Listing</h2>
-</header>
-
 <body id="body">
+    <header>
+        <h2>Media Listing</h2>
+    </header>
+
     <main id="page_content" aria-label="Media Browsing">
         <rxs-page-medialistingpage>
             <style>
@@ -30,24 +30,24 @@
                     border-width: thin;
                     padding: 0px;
                 }
-        
+
                 .list li {
                     display: grid;
                     grid-template-columns: 1fr 1fr 1fr;
                     grid-template-rows: minmax(25px, auto);
                 }
-        
+
                 .list li>div {
                     border-left: solid;
                     border-width: thin;
                 }
-        
+
                 .list li>div.td {
                     border-top: solid;
                     border-width: thin;
                 }
             </style>
-        
+
             <script type="application/javascript" src="/js/components/list.js" defer></script>
 
             <section id="mediaListingContainer">
@@ -105,8 +105,9 @@
             </script>
         </rxs-page-medialistingpage>
     </main>
+
+    <footer>
+    </footer>
 </body>
-<footer>
-</footer>
 
 </html>
