@@ -21,7 +21,7 @@
         <h2>Media Listing</h2>
     </header>
 
-    <main id="page_content" aria-label="Media Browsing">
+    <main id="pageContent" aria-label="Media Browsing">
         <rxs-page-medialistingpage>
             <style>
                 ul.list {
@@ -47,7 +47,6 @@
                     border-width: thin;
                 }
             </style>
-
             <script type="application/javascript" src="/js/components/list.js" defer></script>
 
             <section id="mediaListingContainer">
@@ -68,46 +67,13 @@
                     <div class="td visually-hidden">Details</div>
                 </li>
             </div>
-
-            <script type="module">
-                import {
-                    theApp
-                } from '/js/app.mjs'
-
-                const NaN = '[-Unknown-]';
-
-                let values = await theApp
-                    .mediaMetaDataRestClient
-                    .listAll()
-                    .then(result => result
-                        .map(o => {
-                            return {
-                                id: o.id ?? null,
-                                key: o.key ?? NaN,
-                                createdOn: o.createdOn ?? null,
-                                blob_name: o.blob?.name ?? null,
-                                link: o.id ? `#/media/${o.id}` : null
-                            };
-                        }));
-
-                const options = {
-                    valueNames: [
-                        'key',
-                        'blob_name',
-                        'createdOn',
-                        { data: ['id'] },
-                        { attr: 'href', name: 'link' },
-                    ],
-                    item: 'mediaListingItem'
-                };
-
-                const mediaList = new List('mediaListingContainer', options, values);
-            </script>
         </rxs-page-medialistingpage>
     </main>
 
     <footer>
     </footer>
+
+    <script type="module" src="medialisting.mjs"></script>
 </body>
 
 </html>

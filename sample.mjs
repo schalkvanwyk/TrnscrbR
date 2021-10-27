@@ -6,12 +6,15 @@ export const defineSamplePage = (template) => {
     class Sample extends SamplePage {
         constructor() {
             super();
-            if(template) this.loadTemplate(template);
+            this.addEventListener(MediaListingPage.componentReadyEventName, this.onComponentReady);
+            // this.addEventListener(MediaListingPage.templateLoadedEventName, this.onTemplateLoaded);
         }
-
-        // connectedCallback() {
-        //     this.render();
-        // }
+        async onComponentReady(e) {
+            // render();
+        }
+        async preLoadTemplate(t) {
+            if(template) await this.loadTemplate(template);
+        }
 
         // render() {
         //     // Not needed when template is a declarative shadow root

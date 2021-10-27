@@ -6,12 +6,17 @@ import { HtmlElementWrapper } from '../utils/htmlelementwrapper.mjs';
 
 export default class RxsComponentBase extends HTMLElement {
     static get componentPrefix() { return 'rxs'; }
+    static get componentReadyEventName() { return `${RxsComponentBase.componentPrefix}_componentready`; }
+    static get templateLoadedEventName() { return `${RxsComponentBase.componentPrefix}_templateloaded`; }
     //TODO:Remove
     //static get elementName() { return `${RxsComponentBase.componentPrefix}-page`; }
     static get defaultTemplateId() { return 'pageContentTemplate'; }
     static get defaultTemplatePath() { return; }
     static get defaultContentId() { return 'pageContent'; }
     static get observedAttributes() { return ['templateId', 'templatePath', 'contentId', 'contentContainerElementName', 'shadowMode']; }
+
+    preLoadTemplate = (template) => {};
+    postLoadTemplate = (template) => {};
 
     #isDeclarativeShadowRoot = false;
 
@@ -46,8 +51,10 @@ export default class RxsComponentBase extends HTMLElement {
     async connectedCallback() {
         if (!this.#isDeclarativeShadowRoot && this.shadowRoot) {
             await this.loadTemplate();
-            this.renderInto(this.shadowRoot);
+            this.renderInto(this.shadowRoot.host);
         }
+
+        this.dispatchEvent(new CustomEvent(RxsComponentBase.componentReadyEventName, { detail: this }));
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -68,11 +75,18 @@ export default class RxsComponentBase extends HTMLElement {
     createChild = (elementName, text, display, parent) => HtmlElementWrapper.generate(elementName, text, display, parent);
 
     async loadTemplate(template) {
+        await this.preLoadTemplate(template);
+
+        let templateHasLoaded = false;
         let templateContainer = RxsComponentBase.getTemplateContainer(this);
 
-        if (this.#handleTextTemplate(template)) return;
+        if (!templateHasLoaded) templateHasLoaded = this.#handleTextTemplate(template);
 
-        if (await this.#handleLoadTemplateFromFile(templateContainer)) return;
+        if (!templateHasLoaded) templateHasLoaded = await this.#handleLoadTemplateFromFile(templateContainer);
+
+        await this.postLoadTemplate(template);
+
+        this.dispatchEvent(new CustomEvent(RxsComponentBase.templateLoadedEventName, { detail: this }));
     }
 
     importTemplateContent(parent) {
@@ -82,7 +96,7 @@ export default class RxsComponentBase extends HTMLElement {
             `${this.#isDeclarativeShadowRoot ? 'The template was defined as a declarative shadow root.' : ''}`);
 
         let content = document.importNode(template.content, true);
-        
+
         if (parent.hasChildNodes()) parent.innerHTML = null;
 
         return parent.appendChild(content);
@@ -90,7 +104,7 @@ export default class RxsComponentBase extends HTMLElement {
 
     renderInto = (container) => {
         let shadowRoot = container.shadowRoot;
-        if(!shadowRoot) {
+        if (!shadowRoot) {
             shadowRoot = container.attachShadow({ mode: 'open' });
         } else {
             container.shadowRoot.innerHTML = '';
@@ -137,12 +151,17 @@ export default class RxsComponentBase extends HTMLElement {
                 const fragment = new DOMParser().parseFromString(template, 'text/html', { includeShadowRoot: true });
                 const elementNode = fragment.querySelector(this.localName);
                 const element = document.importNode(elementNode, true);
-                return element.querySelector(`template#${this.templateId}`);
+                return element.querySelector(`template#${this.templateId}`)
+                    ?? element.querySelector(`#${this.contentId}`)
+                    ?? element.children;
             })
             .then(templateContainer => {
                 if (!templateContainer) throw new Error('No Template! Could not find a template.');
 
-                this.appendChild(templateContainer);
+                if (templateContainer instanceof HTMLCollection)
+                    this.append(...templateContainer);
+                else
+                    this.appendChild(templateContainer);
             });
 
         return true;
@@ -151,7 +170,7 @@ export default class RxsComponentBase extends HTMLElement {
     //TODO: get component name from caller
     static define(component) {
         let element = customElements.get(component.elementName);
-        if (!element){
+        if (!element) {
             customElements.define(component.elementName, component);
             element = customElements.get(component.elementName);
         } //else {
@@ -161,7 +180,7 @@ export default class RxsComponentBase extends HTMLElement {
         return element;
     }
 
-    static defineWithTemplate(componentDefiner, templateLoader) {
+    static defineWithTemplate(componentDefiner, templateLoader = () => { }) {
         let template = templateLoader();
 
         return componentDefiner(template);

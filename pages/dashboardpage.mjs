@@ -10,12 +10,6 @@ export class DashboardPage extends RxsComponentBase {
 }
 
 export const renderInto = async (container) => {
-    // let page = container.querySelector(DashboardPage.elementName);
-    // if(!page) page = container.appendChild(document.createElement(DashboardPage.elementName));
-    // else page = container.replaceChild(document.createElement(DashboardPage.elementName), page);
-    // page.setAttribute(`${DashboardPage.componentPrefix}-template-path`, DashboardPage.defaultTemplatePath);
-    // page.setAttribute('shadowMode', 'open');
-
     DashboardPage.define(DashboardPage);
 
     let page = new DashboardPage();

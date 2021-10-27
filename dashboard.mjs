@@ -1,7 +1,5 @@
 import { DashboardPage } from './pages/dashboardpage.mjs';
 
-let templateLoader = () => {}; // return '<template>testing</template>'; };// return '<div>testing</div>'; };
-
 export const defineDashboardPage = (template) => {
     class Dashboard extends DashboardPage {
         // static get elementName() { return `${Dashboard.componentPrefix}-page-dashboardpage`; }
@@ -11,26 +9,15 @@ export const defineDashboardPage = (template) => {
             super();
             if(template) this.loadTemplate(template);
         }
-
-        // connectedCallback() {
-        //     this.render();
-        // }
-
-        // render() {
-        //     // Not needed when template is a declarative shadow root
-        //     // this.renderInto(this.shadowRoot);
-        // }
     }
 
     return () => Dashboard.define(Dashboard);
 }
 
-let dashboardPage = DashboardPage.defineWithTemplate(defineDashboardPage, templateLoader);
+let dashboardPage = DashboardPage.defineWithTemplate(defineDashboardPage);
 
 export const renderDashboardPage = () => {
     dashboardPage();
-
-    //return customElements.get(Dashboard);
 }
 
 export default renderDashboardPage();
