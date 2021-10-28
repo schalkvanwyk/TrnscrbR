@@ -15,7 +15,7 @@ export const renderInto = async (container) => {
     let page = new DashboardPage();
     page.setAttribute(`${DashboardPage.componentPrefix}-template-path`, DashboardPage.defaultTemplatePath);
     page.setAttribute('shadowMode', 'open');
-    container.appendChild(page);
     await page.loadTemplate();
     page.renderInto(container);
+    container.appendChild(page);
 }

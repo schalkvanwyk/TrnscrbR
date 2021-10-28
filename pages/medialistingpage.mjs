@@ -59,5 +59,6 @@ export const renderInto = async (container) => {
     page.setAttribute(`${MediaListingPage.componentPrefix}-template-path`, MediaListingPage.defaultTemplatePath);
     page.setAttribute('shadowMode', 'open');
     await page.loadTemplate();
+    page.renderInto(page);
     container.appendChild(page);
 }

@@ -15,8 +15,8 @@ export default class RxsComponentBase extends HTMLElement {
     static get defaultContentId() { return 'pageContent'; }
     static get observedAttributes() { return ['templateId', 'templatePath', 'contentId', 'contentContainerElementName', 'shadowMode']; }
 
-    preLoadTemplate = (template) => {};
-    postLoadTemplate = (template) => {};
+    preLoadTemplate = (template) => { };
+    postLoadTemplate = (template) => { };
 
     #isDeclarativeShadowRoot = false;
 
@@ -32,6 +32,27 @@ export default class RxsComponentBase extends HTMLElement {
         if (!this.#isDeclarativeShadowRoot)
             if (this.hasAttribute('shadowMode')) this.attachShadow({ mode: this.shadowMode });
     }
+
+    //TODO: get component name from caller
+    static define(component) {
+        let element = customElements.get(component.elementName);
+        if (!element) {
+            customElements.define(component.elementName, component);
+            element = customElements.get(component.elementName);
+        } //else {
+        //     element.renderInto(container);
+        // }
+
+        return element;
+    }
+
+    static defineWithTemplate(componentDefiner, templateLoader = () => { }) {
+        let template = templateLoader();
+
+        return componentDefiner(template);
+    }
+
+    static getTemplateContainer = (scope) => $(`template#${scope.templateId}`, scope) ?? $('template', scope) ?? $(`template#${scope.templateId}`) ?? $('template');
 
     get templateId() { return this.getAttribute(`${RxsComponentBase.componentPrefix}-template-id`) ?? RxsComponentBase.defaultTemplateId; }
 
@@ -80,7 +101,7 @@ export default class RxsComponentBase extends HTMLElement {
         let templateHasLoaded = false;
         let templateContainer = RxsComponentBase.getTemplateContainer(this);
 
-        if (!templateHasLoaded) templateHasLoaded = this.#handleTextTemplate(template);
+        if (!templateHasLoaded) templateHasLoaded = this.#handleLoadTemplateFromText(template);
 
         if (!templateHasLoaded) templateHasLoaded = await this.#handleLoadTemplateFromFile(templateContainer);
 
@@ -95,7 +116,9 @@ export default class RxsComponentBase extends HTMLElement {
         if (!template) throw new Error('No Template! Could not find a "<template>" container to import the content from.' +
             `${this.#isDeclarativeShadowRoot ? 'The template was defined as a declarative shadow root.' : ''}`);
 
-        let content = document.importNode(template.content, true);
+        let templateContentClone = template.content.cloneNode(true);
+
+        let content = document.importNode(templateContentClone, true);
 
         if (parent.hasChildNodes()) parent.innerHTML = null;
 
@@ -103,24 +126,24 @@ export default class RxsComponentBase extends HTMLElement {
     }
 
     renderInto = (container) => {
-        let shadowRoot = container.shadowRoot;
-        if (!shadowRoot) {
-            shadowRoot = container.attachShadow({ mode: 'open' });
+        let shadow = container.shadowRoot;
+        if (!shadow) {
+            shadow = container.attachShadow({ mode: 'open' });
         } else {
             container.shadowRoot.innerHTML = '';
         }
 
-        let templateContainer = $(`${this.contentContainerElementName}#${this.contentId}`, shadowRoot);
+        let templateContainer = $(`${this.contentContainerElementName}#${this.contentId}`, shadow);
 
         if (!templateContainer) templateContainer = this
-            .createChild(this.contentContainerElementName, null, true, shadowRoot)
+            .createChild(this.contentContainerElementName, null, true, shadow)
             .setAttribute('id')(this.contentId)
             .element;
 
         this.importTemplateContent(templateContainer);
     }
 
-    #handleTextTemplate(template) {
+    #handleLoadTemplateFromText(template) {
         if (!template) return false;
 
         if (templateContainer) this.removeChild(templateContainer);
@@ -131,7 +154,8 @@ export default class RxsComponentBase extends HTMLElement {
         if (template) template = document.importNode(template, true);
         else {
             template = document.createElement('template');
-            template.innerHtml = document.importNode(fragment.body, true).innerHTML;
+            let templateContent = document.importNode(fragment.body, true);
+            if(templateContent && templateContent.hasChildNodes()) template.append(...templateContent.childNodes);
         }
 
         this.appendChild(template);
@@ -145,46 +169,102 @@ export default class RxsComponentBase extends HTMLElement {
         const templatePath = this.templatePath;
         if (!templatePath) throw new Error('No Template! Could not find a template.');
 
-        await fetch(templatePath)
+        let scripts;
+
+        const template = await fetch(templatePath)
             .then(stream => stream.text())
             .then(template => {
                 const fragment = new DOMParser().parseFromString(template, 'text/html', { includeShadowRoot: true });
-                const elementNode = fragment.querySelector(this.localName);
-                const element = document.importNode(elementNode, true);
-                return element.querySelector(`template#${this.templateId}`)
-                    ?? element.querySelector(`#${this.contentId}`)
-                    ?? element.children;
-            })
-            .then(templateContainer => {
-                if (!templateContainer) throw new Error('No Template! Could not find a template.');
 
-                if (templateContainer instanceof HTMLCollection)
-                    this.append(...templateContainer);
-                else
-                    this.appendChild(templateContainer);
+                scripts = fragment.querySelectorAll('head>script');
+
+                const componentFragment = fragment.querySelector(this.localName);
+                const componentNode = document.importNode(componentFragment, true);
+
+                return componentNode;
             });
 
+        templateContainer = template.querySelector(`template#${this.templateId}`);
+
+        if (templateContainer) {
+            scripts = [...scripts, ...template.querySelectorAll('script')];
+            for (const script of scripts) {
+                this.#appendScript(this, script);
+            }
+        } else {
+            templateContainer = template.appendChild(document.createElement('template'));
+            templateContainer.id = this.templateId;
+
+            let templateContent = template.querySelector(`#${this.contentId}`);
+            if (templateContent) {
+                templateContainer.appendChild(templateContent);
+            } else {
+                //Must be a static nodelist, so can't use children or childNodes https://developer.mozilla.org/en-US/docs/Web/API/NodeList#live_nodelists
+                //Also see https://css-tricks.com/snippets/javascript/loop-queryselectorall-matches/
+                let childNodes = template.querySelectorAll('*');
+                for (let child of childNodes) {
+                    if (handleTemplate(this, templateContainer, child)) continue;
+                    if (handleScript(this, templateContainer, child)) continue;
+                    if (handleContent(templateContainer, child)) continue;
+
+                    throw new Error('No Template! Could not find a template.');
+                };
+            }
+        }
+        this.appendChild(templateContainer);
+
         return true;
+
+        function handleTemplate(component, target, element) {
+            if (element.localName !== 'template' && element.id !== component.templateId) return false;
+
+            //Already exists
+            if (target.localName === 'template' && target.id === component.templateId) return true;
+
+            target.append(element.cloneNode(true));
+
+            return true;
+        }
+
+        function handleScript(component, target, element) {
+            if (element.localName !== 'script') return false;
+
+            component.#appendScript(target, element.cloneNode(true));
+
+            return true;
+        }
+
+        function handleContent(target, element) {
+            if (element instanceof HTMLCollection)
+                target.append(...element.cloneNode(true));
+            else
+                target.appendChild(element.cloneNode(true));
+
+            return true;
+        }
     }
 
-    //TODO: get component name from caller
-    static define(component) {
-        let element = customElements.get(component.elementName);
-        if (!element) {
-            customElements.define(component.elementName, component);
-            element = customElements.get(component.elementName);
-        } //else {
-        //     element.renderInto(container);
-        // }
+    #appendScript(target, scriptNode) {
+        let result = document.createElement('script');
 
-        return element;
+        const isDefered = scriptNode.hasAttribute('defer');
+        if (isDefered) result.toggleAttribute('defer')
+
+        if (scriptNode.hasAttribute('src')) {
+            result.src = scriptNode.getAttribute('src');
+        }
+        else if (scriptNode.textContent) {
+            result.textContent = scriptNode.textContent;
+        }
+
+        if (isDefered) {
+            const head = target.ownerDocument.head;
+            if (!head.querySelector(`script[src="${scriptNode.src}"]`))
+                return head.appendChild(result);
+            else
+                return target.parentNode.appendChild(result);
+        }
+        else
+            return target.appendChild(result);
     }
-
-    static defineWithTemplate(componentDefiner, templateLoader = () => { }) {
-        let template = templateLoader();
-
-        return componentDefiner(template);
-    }
-
-    static getTemplateContainer = (scope) => $(`template#${scope.templateId}`, scope) ?? $('template', scope) ?? $(`template#${scope.templateId}`) ?? $('template');
 }

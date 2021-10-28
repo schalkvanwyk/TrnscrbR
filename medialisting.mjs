@@ -1,22 +1,16 @@
 import { MediaListingPage } from './pages/medialistingpage.mjs';
 
-export const defineMediaListingPage = (template) => {
-    class MediaListing extends MediaListingPage {
-        constructor() {
-            super();
-        }
-        async preLoadTemplate(t) {
-            if(template) await this.loadTemplate(template);
-        }
+class MediaListing extends MediaListingPage {
+    constructor() {
+        super();
     }
-
-    return () => MediaListing.define(MediaListing);
+    async preLoadTemplate(t) {
+        if(template) await this.loadTemplate(template);
+    }
 }
 
-let mediaListingPage = MediaListingPage.defineWithTemplate(defineMediaListingPage);
-
 export const renderMediaListingPage = () => {
-    mediaListingPage();
+    MediaListing.define(MediaListing);
 }
 
 export default renderMediaListingPage();
